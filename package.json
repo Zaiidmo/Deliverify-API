@@ -1,5 +1,5 @@
 {
-  "name": "auth-api",
+  "name": "deliverify-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,9 +14,11 @@
     "url": "Authenticaiton-API"
   },
   "keywords": [
-    "auth",
+    "delivery",
+    "deliverify",
+    "shipping",
+    "shopping",
     "API",
-    "OTP",
     "2FA",
     "JWT",
     "Authentication"
