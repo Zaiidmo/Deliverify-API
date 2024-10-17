@@ -22,7 +22,6 @@ const orderSchema = new mongoose.Schema({
     Delivery:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true
     },
     status: {
         type: String,
