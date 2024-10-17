@@ -2,6 +2,9 @@ const connectDB = require("./config/db");
 const Role = require("./models/Role");
 const User = require("./models/User");
 const Permission = require("./models/Permission");
+const Restaurant = require("./models/Restaurant");
+const Item = require("./models/Item");
+const Order = require("./models/Order");
 
 const seedDatabase = async () => {
   await connectDB();
@@ -10,6 +13,9 @@ const seedDatabase = async () => {
   await Role.deleteMany();
   await User.deleteMany();
   await Permission.deleteMany();
+  await Restaurant.deleteMany();
+  await Item.deleteMany();
+  await Order.deleteMany();
 
   // Define initial permissions
   const permissions = [
@@ -80,6 +86,7 @@ const seedDatabase = async () => {
       email: "admin@email.com",
       phoneNumber: "1234567890",
       password: "password",
+      CIN: "AA123456",
       roles: [initialRoles[0]._id],
       isVerified: true,
     },
@@ -89,6 +96,7 @@ const seedDatabase = async () => {
       email: "client@email.com",
       phoneNumber: "1234522310",
       password: "password",
+      CIN: "CC123456",
       roles: [initialRoles[1]._id],
       isVerified: true,
     },
@@ -98,6 +106,7 @@ const seedDatabase = async () => {
       email: "manager@email.com",
       phoneNumber: "1234542410",
       password: "password",
+      CIN: "MM123456",
       roles: [initialRoles[2]._id],
       isVerified: true,
     },
@@ -107,6 +116,7 @@ const seedDatabase = async () => {
       email: "delivery@email.com",
       phoneNumber: "1234562290",
       password: "password",
+      CIN: "DD123456",
       roles: [initialRoles[3]._id],
       isVerified: true,
     },
@@ -115,7 +125,45 @@ const seedDatabase = async () => {
   // Create users
   const initialUsers = await User.insertMany(users);
   //   console.log("Users created: ", initialUsers);
+  const initialRestaurants = await Restaurant.insertMany([
+    {
+      name: "Restaurant 1",
+      address: "Address 1",
+      phoneNumber: "1122334455",
+      website: "",
+      description: "Description 1",
+      owner: initialUsers[2]._id,
+      openAt: "08:00",
+      closeAt: "22:00",
+      category : {
+        name: "Fast Food",
+        description: "Fast Food"
+      },
+    },
+  ]);
+  const initialItem = await Item.insertMany([
+    {
+      name: "Item 1",
+      description: "Description 1",
+      price: 10,
+      restaurant: initialRestaurants[0]._id,
+      category: "Category 1",
+    },
+  ]);
 
+  const initialOrder = await Order.insertMany([
+    {
+      user: initialUsers[1]._id,
+      items: [
+        {
+          item: initialItem[0]._id,
+          quantity: 2,
+        },
+      ],
+      Delivery: initialUsers[3]._id,
+      totalAmount: 20,
+    },
+  ]);
   // Close the connection
   process.exit(0);
 };

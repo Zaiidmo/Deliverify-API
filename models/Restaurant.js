@@ -41,11 +41,9 @@ const restaurantSchema =  new mongoose.Schema({
         type: {
             type: String,
             enum: ["Point"],
-            required: true,
         },
         coordinates: {
             type: [Number],
-            required: true,
         },
     },
     owner: {
@@ -65,6 +63,11 @@ const restaurantSchema =  new mongoose.Schema({
         name: {
             type: String,
             required: [true, "Category name is required"],
+            trim: true,
+        },
+        description: {
+            type: String,
+            required: [true, "Category description is required"],
             trim: true,
         },
     }    
