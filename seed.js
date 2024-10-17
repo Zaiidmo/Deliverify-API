@@ -22,7 +22,10 @@ const seedDatabase = async () => {
     { name: "DELETE_RESTAURANT", description: "Delete an existing restaurant" },
     { name: "CREATE_REVIEW", description: "Create a new review" },
     { name: "UPDATE_REVIEW", description: "Update an existing review" },
-    { name: "DELETE_REVIEW", description: "Delete an existing review" },
+    {
+      name: "DELETE_REVIEW",
+      dAlloMediaescription: "Delete an existing review",
+    },
     { name: "CREATE_LIKE", description: "Create a new like" },
     { name: "DELETE_LIKE", description: "Delete an existing like" },
     { name: "CREATE_FAVORITE", description: "Create a new favorite" },
@@ -51,20 +54,18 @@ const seedDatabase = async () => {
       ],
     },
     {
-        name: "Manager",
-        permissions: [
-          initialPermissions[4]._id,
-          initialPermissions[5]._id,
-          initialPermissions[6]._id,
-          initialPermissions[9]._id,
-        ],
+      name: "Manager",
+      permissions: [
+        initialPermissions[4]._id,
+        initialPermissions[5]._id,
+        initialPermissions[6]._id,
+        initialPermissions[9]._id,
+      ],
     },
     {
-        name: "Delivery",
-        permissions: [
-          initialPermissions[14]._id,
-        ],
-    }
+      name: "Delivery",
+      permissions: [initialPermissions[14]._id],
+    },
   ];
 
   // Create roles
@@ -74,38 +75,46 @@ const seedDatabase = async () => {
   // Define initial users
   const users = [
     {
+      fullname: { fname: "Admin", lname: "Test" },
       username: "Admin",
       email: "admin@email.com",
+      phoneNumber: "1234567890",
       password: "password",
       roles: [initialRoles[0]._id],
       isVerified: true,
     },
     {
+      fullname: { fname: "Client", lname: "Test" },
       username: "Client",
       email: "client@email.com",
+      phoneNumber: "1234522310",
       password: "password",
       roles: [initialRoles[1]._id],
       isVerified: true,
     },
     {
+      fullname: { fname: "Manager", lname: "Test" },
       username: "Manager",
       email: "manager@email.com",
+      phoneNumber: "1234542410",
       password: "password",
       roles: [initialRoles[2]._id],
       isVerified: true,
     },
     {
-        username: "Delivery",
-        email: "delivery@email.com",
-        password: "password",
-        roles: [initialRoles[3]._id],
-        isVerified: true,
-    }
+      fullname: { fname: "Delivery", lname: "Test" },
+      username: "Delivery",
+      email: "delivery@email.com",
+      phoneNumber: "1234562290",
+      password: "password",
+      roles: [initialRoles[3]._id],
+      isVerified: true,
+    },
   ];
 
   // Create users
   const initialUsers = await User.insertMany(users);
-//   console.log("Users created: ", initialUsers);
+  //   console.log("Users created: ", initialUsers);
 
   // Close the connection
   process.exit(0);
