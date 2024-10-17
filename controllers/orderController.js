@@ -1,4 +1,5 @@
 const jwtService = require('../services/jwtService'); 
+const mollieService = require('../services/mollieService');
 const User = require("../models/User");
 const Order = require("../models/Order"); 
 const Item = require("../models/Item"); 
@@ -49,12 +50,15 @@ const purchase = async (req, res) => {
             totalAmount += item.price * quantity;
         }
 
+        const payment = await mollieService.createPayment(totalAmount, `Order By ${user.username}`);
+
         // Step 5: Create the order
         const newOrder = new Order({
             user: user._id, 
             items: items,   
             totalAmount: totalAmount,
-            status: 'Pending' 
+            status: 'Pending',
+            paymentId: payment.id,
         });
 
         console.log(newOrder);
