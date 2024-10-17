@@ -77,7 +77,6 @@ describe('Auth Controller - Login and Authentication', () => {
         isVerified: true,
         trustedDevices: [{
           agent: 'Mozilla/5.0',
-          ipAddress: '127.0.0.1',
           deviceName: 'localhost',
           addedAt: new Date(),
         }],
@@ -85,7 +84,6 @@ describe('Auth Controller - Login and Authentication', () => {
 
       const actualDevice = {
         agent: 'Mozilla/5.0',
-        ipAddress: '127.0.0.1',
         deviceName: 'localhost',
       };
 
@@ -204,7 +202,6 @@ describe('Auth Controller - Login and Authentication', () => {
       // Mock device information
       const actualDevice = {
         agent: 'Mozilla/5.0',
-        ipAddress: '127.0.0.1',
         deviceName: 'localhost',
       };
       deviceService.getTheDevice.mockReturnValue(actualDevice);
@@ -266,7 +263,6 @@ describe('Auth Controller - Login and Authentication', () => {
 
       const actualDevice = {
         agent: 'Mozilla/5.0',
-        ipAddress: '127.0.0.1',
         deviceName: 'localhost',
       };
 
@@ -279,7 +275,6 @@ describe('Auth Controller - Login and Authentication', () => {
       expect(mockUser.trustedDevices).toHaveLength(1); // Check if the device is added
       expect(mockUser.trustedDevices[0]).toEqual(expect.objectContaining({
         agent: actualDevice.agent,
-        ipAddress: actualDevice.ipAddress,
         deviceName: actualDevice.deviceName,
       }));
       expect(mockUser.save).toHaveBeenCalled(); // Ensure save method is called

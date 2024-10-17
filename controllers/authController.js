@@ -147,7 +147,6 @@ const login = async (req, res) => {
     const trustedDevice = user.trustedDevices.find((device) => {
       return (
         device.userAgent === actualDevice.userAgent &&
-        device.ipAddress === actualDevice.ipAddress &&
         device.deviceName === actualDevice.deviceName &&
         new Date(device.addedAt).getTime() + 30 * 24 * 60 * 60 * 1000 >
           Date.now()
@@ -228,7 +227,6 @@ const verifyOtp = async (req, res) => {
       const newDevice = {
         agent: actualDevice.agent,
         deviceName: actualDevice.deviceName,
-        ipAddress: actualDevice.ipAddress,
         addedAt: new Date(),
       };
       user.trustedDevices.push(newDevice);

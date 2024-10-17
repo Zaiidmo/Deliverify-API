@@ -74,11 +74,7 @@ const userSchema = new mongoose.Schema({
       deviceName: {
         type: String,
         trim: true,
-        default: "Unknown Device", // Optional field to identify the device
-      },
-      ipAddress: {
-        type: String,
-        trim: true,
+        default: "Unknown Device", 
       },
       addedAt: {
         type: Date,
