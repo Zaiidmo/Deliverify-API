@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema({
       message: (props) => `${props.value} is not a valid email!`,
     },
   },
+  avatar: {
+    type: String,
+    default: "default.jpg",
+  },
   phoneNumber: {
     type: String,
     required: [true, "Phone number is required"],
@@ -53,6 +57,23 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Password is required"],
     minlength: [6, "Password must be at least 6 characters long"],
+  },
+  CIN: {
+    type: String,
+    required: [true, "CIN is required"],
+    unique: true,
+    trim: true,
+    validate: {
+      validator: function (value) {
+        const cinRegex = /^[a-zA-Z]+[0-9]{6}$/;
+        return cinRegex.test(value);
+      },
+      message: (props) => `${props.value} is not a valid CIN!`,
+    },
+  },
+  address: {
+    type: String,
+    trim: true,
   },
   roles: [
     {
