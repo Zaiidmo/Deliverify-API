@@ -17,7 +17,7 @@ const createPayment = async (totalAmount, description) => {
             },
             description: description,
             redirectUrl: `${process.env.CLIENT_URL}/payment-success`, 
-            // webhookUrl: 'https://yourwebsite.com/webhook'
+            // webhookUrl: `${process.env.BASE_URL}/api/webhooks/payment`
         });
 
         return payment;

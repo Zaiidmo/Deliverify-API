@@ -69,7 +69,8 @@ const purchase = async (req, res) => {
         // Step 7: Respond with success
         return res.status(201).json({
             message: 'Order placed successfully',
-            order: newOrder
+            order: newOrder,
+            paymentLink: payment._links.checkout.href,
         });
 
     } catch (error) {
