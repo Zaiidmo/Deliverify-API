@@ -7,9 +7,9 @@ const Item = require("../models/Item");
 const purchase = async (req, res) => {
     try {
         // Step 1: Verify token
-        const token = req.headers.authorization.split(' ')[1];
+        const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
         if (!token) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            return res.status(401).json({ message: 'Unauthorized' }); // Return 401 for missing token
         }
 
         const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
@@ -25,44 +25,46 @@ const purchase = async (req, res) => {
 
         // Step 3: Extract order details from the request body
         const { items: orderItems } = req.body;
-        if (!orderItems || orderItems.length === 0 ) {
-            return res.status(400).json({ message: 'Invalid order data' });
+
+        // Check if orderItems is defined and is an array
+        if (!Array.isArray(orderItems) || orderItems.length === 0) {
+            return res.status(400).json({ message: 'Invalid order data' }); // Check for valid order items here
         }
 
         const items = [];
         let totalAmount = 0;
 
         // Step 4: Loop through the items and fetch their details from the database
-        for (let i = 0; i < orderItems.length; i++) {
-            const { itemId, quantity } = orderItems[i];
+        for (const { itemId, quantity } of orderItems) {
+            if (!itemId || !quantity) {
+                return res.status(400).json({ message: 'Invalid item data' });
+            }
 
             const item = await Item.findById(itemId);
             if (!item) {
-                return res.status(400).json({ message: `Item ${item.name} not found` });
+                return res.status(400).json({ message: `Item ${itemId} not found` }); // Use itemId for clarity
             }
 
-            items.push({
-                item: itemId,
-                quantity: quantity
-            });
-
-            // Calculate total amount (assuming `price` field exists in the Item model)
-            totalAmount += item.price * quantity;
+            items.push({ item: itemId, quantity: quantity });
+            totalAmount += item.price * quantity; // Assumes item.price exists
         }
 
         const payment = await mollieService.createPayment(totalAmount, `Order By ${user.username}`);
+        
+        // Check payment creation
+        if (!payment || !payment.id) {
+            return res.status(500).json({ message: 'Payment creation failed' });
+        }
 
         // Step 5: Create the order
         const newOrder = new Order({
-            user: user._id, 
-            items: items,   
+            user: user._id,
+            items: items,
             totalAmount: totalAmount,
             status: 'Pending',
             paymentId: payment.id,
         });
 
-        console.log(newOrder);
-        
         // Step 6: Save the order to the database
         await newOrder.save();
 
@@ -74,7 +76,7 @@ const purchase = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error('Error processing purchase:', error); // More specific logging
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 };

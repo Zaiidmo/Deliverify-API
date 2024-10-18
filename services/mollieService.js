@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { createMollieClient } = require('@mollie/api-client');
 
 const mollieClient = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY });
@@ -22,7 +23,7 @@ const createPayment = async (totalAmount, description) => {
 
         return payment;
     } catch (error) {
-        console.error('Error creating payment:', error);
+        // console.error('Error creating payment:', error);
         throw error;
     }
 };
@@ -38,7 +39,7 @@ const isPaymentSuccessful = async (paymentId) => {
         const payment = await mollieClient.payments.get(paymentId);
         return payment.isPaid;
     } catch (error) {
-        console.error('Error checking payment status:', error);
+        // console.error('Error checking payment status:', error);
         throw error;
     }
 }
