@@ -3,8 +3,9 @@ const mollieService = require('../services/mollieService');
 const User = require("../models/User");
 const Order = require("../models/Order"); 
 const Item = require("../models/Item"); 
+const { emitOrderPaid } = require('../services/socketService');
 
-const purchase = async (req, res) => {
+const purchase = async (req, res, io) => {
     try {
         // Step 1: Verify token
         const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
@@ -67,6 +68,10 @@ const purchase = async (req, res) => {
 
         // Step 6: Save the order to the database
         await newOrder.save();
+
+        if( payment.status === 'paid' ) {
+            emitOrderPaid(io, newOrder._id, `Order ${newOrder._id} has been ordered and paid by ${user.username}`);
+        }
 
         // Step 7: Respond with success
         return res.status(201).json({

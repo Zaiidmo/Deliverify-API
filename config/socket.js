@@ -1,13 +1,14 @@
-const { Server } = require('socket.io');
+const { Server } = require("socket.io");
 
-const initializeSocket = (server) => {
-    const io = new Server(server);
-    io.on('connection', (socket) => {
-        console.log('a user connected', socket.id);
-        socket.on('disconnect', () => {
-            console.log('user disconnected', socket.id);
-        });
+const initializeSocket = (httpServer) => {
+    const io = new Server(httpServer, {
+        cors: {
+            origin: "http://localhost:5173", // Adjust according to your frontend
+            methods: ["GET", "POST"],
+            credentials: true,
+        },
     });
+
     return io;
 };
 

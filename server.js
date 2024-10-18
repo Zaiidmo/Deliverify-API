@@ -7,10 +7,12 @@ const verificationRoutes = require('./routes/verifyEmail');
 const orderRoutes = require('./routes/order');
 const webHooksRoutes = require('./routes/webhooks');
 const initializeSocket = require('./config/socket');
+const http = require('http');
 
 const app = express();
 const cors = require('cors');
 const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
 const io = initializeSocket(server);
 
 // MongoDB connection 
@@ -31,7 +33,7 @@ app.use(bodyParser.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/verify', verificationRoutes);
-app.use('/api/order', orderRoutes);
+app.use('/api/order', orderRoutes(io));
 app.use('/api/webhooks', webHooksRoutes);
 
 // Start the Server
