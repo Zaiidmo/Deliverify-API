@@ -6,10 +6,12 @@ const authRoutes = require('./routes/auth');
 const verificationRoutes = require('./routes/verifyEmail');
 const orderRoutes = require('./routes/order');
 const webHooksRoutes = require('./routes/webhooks');
+const initializeSocket = require('./config/socket');
 
 const app = express();
 const cors = require('cors');
 const PORT = process.env.PORT || 3000;
+const io = initializeSocket(server);
 
 // MongoDB connection 
 connectDB();
