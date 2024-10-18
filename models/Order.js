@@ -22,17 +22,20 @@ const orderSchema = new mongoose.Schema({
     Delivery:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: true
     },
     status: {
         type: String,
-        enum: ["Pending", "Preparing", "Accepted", "Picked_up","Reported ", "Delivered", "Cancelled"],
+        enum: ["Pending", "Paid","failedPayment" , "Preparing", "Accepted", "Picked_up","Reported ", "Delivered", "Cancelled"],
         default: "Pending"
     },
     totalAmount : {
         type: Number,
         required: true
     },
+    paymentId: {
+        type: "String",
+        required: true
+    }
 });
 
 const Order = mongoose.model("Order", orderSchema);

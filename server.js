@@ -4,6 +4,8 @@ const connectDB = require('./config/db');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const verificationRoutes = require('./routes/verifyEmail');
+const orderRoutes = require('./routes/order');
+const webHooksRoutes = require('./routes/webhooks');
 
 const app = express();
 const cors = require('cors');
@@ -27,6 +29,8 @@ app.use(bodyParser.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/verify', verificationRoutes);
+app.use('/api/order', orderRoutes);
+app.use('/api/webhooks', webHooksRoutes);
 
 // Start the Server
 if (require.main === module) {

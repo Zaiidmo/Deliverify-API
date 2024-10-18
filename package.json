@@ -26,6 +26,7 @@
   "author": "TheVlpha",
   "license": "ISC",
   "dependencies": {
+    "@mollie/api-client": "^4.1.0",
     "aws-sdk": "^2.1691.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.3",
