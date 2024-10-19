@@ -1,6 +1,7 @@
 const orderController = require("../../controllers/orderController");
 const jwtService = require("../../services/jwtService");
 const mollieService = require("../../services/mollieService");
+const socketService = require("../../services/socketService");
 const Order = require("../../models/Order");
 const User = require("../../models/User");
 const Item = require("../../models/Item");
@@ -11,6 +12,7 @@ jest.mock("../../services/mollieService");
 jest.mock("../../models/Order");
 jest.mock("../../models/User");
 jest.mock("../../models/Item");
+jest.mock("../../services/socketService");
 
 describe("Order Controller - Purchase Function", () => {
   let req, res;
@@ -33,7 +35,7 @@ describe("Order Controller - Purchase Function", () => {
   });
 
   describe("purchase", () => {
-    it("should successfully place an order for valid data", async () => {
+    it("should successfully place an order for valid data and notify delivery persons", async () => {
       req.body = {
         items: [
           { itemId: "item1_id", quantity: 2 },
@@ -68,26 +70,25 @@ describe("Order Controller - Purchase Function", () => {
           paymentLink: "payment_link",
         })
       );
+      expect(socketService.notifyDeliveryPersons).toHaveBeenCalled(); // Check if socket notification was sent
     });
 
     it('should return 401 if token is missing', async () => {
         req.headers.authorization = undefined;
 
-    
         await orderController.purchase(req, res);
-    
+
         expect(res.status).toHaveBeenCalledWith(401); 
-        expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized' }); 
+        expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized: Missing token' }); 
     });
     
-
     it("should return 401 if token is invalid", async () => {
       jwtService.verifyToken.mockReturnValue(null);
 
       await orderController.purchase(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized" });
+      expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: Invalid token" });
     });
 
     it("should return 401 if user does not exist", async () => {
@@ -98,7 +99,7 @@ describe("Order Controller - Purchase Function", () => {
       await orderController.purchase(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized" });
+      expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: User not found" });
     });
 
     it("should return 400 if order items are invalid", async () => {
@@ -111,7 +112,7 @@ describe("Order Controller - Purchase Function", () => {
       await orderController.purchase(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: "Invalid order data" });
+      expect(res.json).toHaveBeenCalledWith({ message: "Invalid order data: No items provided" });
     });
 
     it("should return 400 if an item is not found", async () => {
@@ -129,7 +130,7 @@ describe("Order Controller - Purchase Function", () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        message: `Item ${itemId} not found`,
+        message: `Invalid item data: Item ${itemId} not found`,
       });
     });
 
@@ -150,7 +151,7 @@ describe("Order Controller - Purchase Function", () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
-        message: "Internal Server Error",
+        message: "Internal Server Error: Payment error",
       });
     });
   });

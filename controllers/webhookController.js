@@ -1,5 +1,6 @@
 const mollieService = require('../services/mollieService');
 const Order = require('../models/Order');
+const socketService = require('../services/socketService');
 
 const mollieWebhook = async (req, res) => {
     try {
@@ -8,22 +9,42 @@ const mollieWebhook = async (req, res) => {
 
         // Fetch the payment status from Mollie
         const payment = await mollieService.isPaymentSuccessful(paymentId);
+        if (!payment) {
+            return res.status(404).json({ message: 'Payment not found' });
+        }
 
         // Find the order linked to this payment
-        const order = await Order.findOne({ paymentId });
+        const order = await Order.findOne({ paymentId }).populate('user');
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
         // Update order status based on payment result
         if (payment.status === 'paid') {
-            order.status = 'Paid';  // Payment successful
-        } else if (payment.status === 'failed') {
-            order.status = 'failedPayment';  // Payment failed
-        }
+            order.status = 'Paid';
+            await order.save();
 
-        // Save the updated order
-        await order.save();
+            // Notify user about successful payment
+            socketService.notifyUser(order.user._id, 'paymentSuccess', {
+                orderId: order._id,
+                message: `Order ${order._id} has been paid successfully`,
+                status: order.status
+            });
+
+            // Notify delivery persons about new order
+            socketService.notifyDeliveryPersons(order);
+
+        } else if (payment.status === 'failed') {
+            order.status = 'failedPayment';
+            await order.save();
+
+            // Notify user about failed payment
+            socketService.notifyUser(order.user._id, 'paymentFailed', {
+                orderId: order._id,
+                message: `Payment failed for order ${order._id}`,
+                status: order.status
+            });
+        }
 
         // Respond to Mollie that the webhook was processed successfully
         return res.status(200).json({ message: 'Webhook processed successfully' });
