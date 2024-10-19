@@ -1,32 +1,34 @@
-const { Server } = require("socket.io");
+// config/socket.js
+const socketIO = require('socket.io');
 
-const initializeSocket = (httpServer) => {
-    const io = new Server(httpServer, {
+function initializeSocket(server) {
+    const io = socketIO(server, {
         cors: {
-            origin: "*", // Adjust according to your frontend
+            origin: "*",
             methods: ["GET", "POST"],
-            credentials: true,
-        },
+            credentials: true
+        }
     });
 
-    // Add event listener for client connection
+    // Connection handling
     io.on('connection', (socket) => {
-        console.log('A client connected:', socket.id);
+        console.log('Client connected:', socket.id);
 
-        // Emit a test event to check if the client receives it
-        socket.emit('orderPaid', {
-            message: 'Test order has been paid!',
-            orderId: 'test123',
-            username: 'testUser'
+        // Handle client authentication
+        socket.on('authenticate', (data) => {
+            const { userId, roles } = data;
+            socket.userId = userId;
+            socket.roles = roles;
+            console.log(`User ${userId} authenticated with roles:`, roles);
         });
 
-        // Handle disconnect event
+        // Handle disconnection
         socket.on('disconnect', () => {
             console.log('Client disconnected:', socket.id);
         });
     });
 
     return io;
-};
+}
 
 module.exports = initializeSocket;

@@ -1,27 +1,27 @@
 const jwtService = require('../services/jwtService'); 
 const mollieService = require('../services/mollieService');
+const socketService = require('../services/socketService');
 const User = require("../models/User");
 const Order = require("../models/Order"); 
 const Item = require("../models/Item"); 
-const { emitOrderPaid } = require('../services/socketService');
 
 const purchase = async (req, res, io) => {
     try {
         // Step 1: Verify token
         const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
         if (!token) {
-            return res.status(401).json({ message: 'Unauthorized' }); // Return 401 for missing token
+            return res.status(401).json({ message: 'Unauthorized: Missing token' });
         }
 
         const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
         if (!decoded) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
         }
 
         // Step 2: Verify user exists
         const user = await User.findById(decoded._id);
         if (!user) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            return res.status(401).json({ message: 'Unauthorized: User not found' });
         }
 
         // Step 3: Extract order details from the request body
@@ -29,7 +29,7 @@ const purchase = async (req, res, io) => {
 
         // Check if orderItems is defined and is an array
         if (!Array.isArray(orderItems) || orderItems.length === 0) {
-            return res.status(400).json({ message: 'Invalid order data' }); // Check for valid order items here
+            return res.status(400).json({ message: 'Invalid order data: No items provided' });
         }
 
         const items = [];
@@ -38,18 +38,19 @@ const purchase = async (req, res, io) => {
         // Step 4: Loop through the items and fetch their details from the database
         for (const { itemId, quantity } of orderItems) {
             if (!itemId || !quantity) {
-                return res.status(400).json({ message: 'Invalid item data' });
+                return res.status(400).json({ message: 'Invalid item data: Missing itemId or quantity' });
             }
 
             const item = await Item.findById(itemId);
             if (!item) {
-                return res.status(400).json({ message: `Item ${itemId} not found` }); // Use itemId for clarity
+                return res.status(400).json({ message: `Invalid item data: Item ${itemId} not found` });
             }
 
             items.push({ item: itemId, quantity: quantity });
             totalAmount += item.price * quantity; // Assumes item.price exists
         }
 
+        // Step 5: Create payment
         const payment = await mollieService.createPayment(totalAmount, `Order By ${user.username}`);
         
         // Check payment creation
@@ -57,24 +58,20 @@ const purchase = async (req, res, io) => {
             return res.status(500).json({ message: 'Payment creation failed' });
         }
 
-        // Step 5: Create the order
+        // Step 6: Create the order
         const newOrder = new Order({
             user: user._id,
             items: items,
             totalAmount: totalAmount,
-            status: 'Pending',
+            status: payment.status === 'paid' ? 'Paid' : 'Pending',
             paymentId: payment.id,
         });
 
-        // Step 6: Save the order to the database
+        socketService.notifyDeliveryPersons(newOrder);
+        // Step 7: Save the order to the database
         await newOrder.save();
 
-        const message = `Order ${newOrder._id} has been placed by ${user.username}`;
-        if( payment.status === 'paid' ) {
-            emitOrderPaid(io, newOrder._id, message);
-        }
-
-        // Step 7: Respond with success
+        // Step 8: Respond with success
         return res.status(201).json({
             message: 'Order placed successfully',
             order: newOrder,
@@ -82,8 +79,8 @@ const purchase = async (req, res, io) => {
         });
 
     } catch (error) {
-        console.error('Error processing purchase:', error); // More specific logging
-        return res.status(500).json({ message: 'Internal Server Error' });
+        console.error('Error processing purchase:', error);
+        return res.status(500).json({ message: 'Internal Server Error: ' + error.message });
     }
 };
 
