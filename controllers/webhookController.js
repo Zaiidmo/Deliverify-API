@@ -8,6 +8,9 @@ const mollieWebhook = async (req, res) => {
 
         // Fetch the payment status from Mollie
         const payment = await mollieService.isPaymentSuccessful(paymentId);
+        if (!payment ) {
+            return res.status(404).json({ message: 'Payment not found' });
+        }
 
         // Find the order linked to this payment
         const order = await Order.findOne({ paymentId });
@@ -24,6 +27,10 @@ const mollieWebhook = async (req, res) => {
 
         // Save the updated order
         await order.save();
+
+        const message = `Order ${order._id} has been ${order.status.toLowerCase()} by ${order.user.username}`;
+        // Emit event to notify clients about the order status
+        emitOrderPaid(io, order._id, message);
 
         // Respond to Mollie that the webhook was processed successfully
         return res.status(200).json({ message: 'Webhook processed successfully' });

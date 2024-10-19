@@ -69,8 +69,9 @@ const purchase = async (req, res, io) => {
         // Step 6: Save the order to the database
         await newOrder.save();
 
+        const message = `Order ${newOrder._id} has been placed by ${user.username}`;
         if( payment.status === 'paid' ) {
-            emitOrderPaid(io, newOrder._id, `Order ${newOrder._id} has been ordered and paid by ${user.username}`);
+            emitOrderPaid(io, newOrder._id, message);
         }
 
         // Step 7: Respond with success

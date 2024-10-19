@@ -1,18 +1,17 @@
 const io = require('socket.io-client');
 
-// Connect to the backend server (ensure the URL matches your backend's running instance)
+// Connect to your backend Socket.IO server
 const socket = io('http://localhost:3000');
+
+socket.on('connect', () => {
+    console.log('Connected to server');
+});
 
 // Listen for the 'orderPaid' event
 socket.on('orderPaid', (data) => {
-    console.log('Received orderPaid event:', data);
-});
-
-// Optional: Add any error or connection event listeners for debugging
-socket.on('connect', () => {
-    console.log('Socket connected successfully!');
+    console.log('Order Paid Notification:', data);
 });
 
 socket.on('disconnect', () => {
-    console.log('Socket disconnected');
+    console.log('Disconnected from server');
 });
