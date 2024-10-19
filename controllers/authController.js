@@ -6,6 +6,7 @@ const User = require("../models/User");
 const Role = require("../models/Role");
 const { validateRegistration } = require("../validations/authValidations");
 const deviceService = require("../services/deviceService");
+const logService  = require("../services/logService");
 
 // Helper function to find existing user by fields
 const findExistingUser = async (username, email, phoneNumber) => {
@@ -34,6 +35,7 @@ const register = async (req, res) => {
       email,
       phoneNumber,
       password,
+      CIN,
       roles: roleNames,
     } = req.body;
 
@@ -76,12 +78,23 @@ const register = async (req, res) => {
       email,
       phoneNumber,
       password: hashedPassword,
+      CIN,
       roles: roles.map((role) => role._id),
       isVerified: false,
     });
 
     await newUser.save();
 
+    try {
+      await logService.userRegistration(newUser._id, newUser.username);
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
+
+
+    if(logService.userRegistration){
+      console.log("User log successful!");
+    }   
     const verificationToken = jwtService.generateVerificationToken(newUser._id);
     console.log("Sending verification email to:", email);
     await mailService.sendVerificationEmail(
