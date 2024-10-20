@@ -3,6 +3,7 @@ const express = require('express');
 const connectDB = require('./config/db');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
+const restaurantRoutes = require('./routes/restaurant');
 const verificationRoutes = require('./routes/verifyEmail');
 
 const app = express();
@@ -27,6 +28,8 @@ app.use(bodyParser.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/verify', verificationRoutes);
+app.use('/api/restaurants', restaurantRoutes);
+
 
 // Start the Server
 if (require.main === module) {
