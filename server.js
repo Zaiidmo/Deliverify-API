@@ -4,12 +4,13 @@ const express = require('express');
 const connectDB = require('./config/db');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
+const roleRoutes = require('./routes/role')
 const verificationRoutes = require('./routes/verifyEmail');
 const orderRoutes = require('./routes/order');
 const webHooksRoutes = require('./routes/webhooks');
 const http = require('http');
 const cors = require('cors');
-const initializeSocketServer = require('./socket-server'); // Import the socket server setup
+const initializeSocketServer = require('./socket-server');
 const socketService = require('./services/socketService');
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/verify', verificationRoutes);
 app.use('/api/order', orderRoutes(socketService.io));
 app.use('/api/webhooks', webHooksRoutes);
+app.use('/api/roles', roleRoutes)
 
 // Initialize Socket.IO server
 const io = initializeSocketServer(server);
