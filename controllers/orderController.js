@@ -84,4 +84,28 @@ const purchase = async (req, res, io) => {
     }
 };
 
-module.exports = { purchase };
+const getOrderStatus = async (req, res) => {
+    try {
+        const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'Unauthorized: Missing token' });
+        }
+        
+        const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
+        if (!decoded) {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        const userId = decoded._id;
+
+        const orders = await Order.find({ user: userId });
+        if (!orders) {
+            return res.status(404).json({ message: 'No orders found' });
+        }
+        return res.status(200).json({ orders });
+    } catch (error) {
+        console.error('Error getting order status:', error);
+        return res.status(500).json({ message: 'Internal Server Error: ' + error.message });
+    }
+};
+module.exports = { purchase, getOrderStatus };
