@@ -38,8 +38,31 @@ try {
 }
 };
 
+
+const updateRestaurant = async (req, res) => {
+  try{
+const {id} = req.params;
+const updateData = req.body;
+
+const updatedRestaurant = await restaurantService.updateRestaurantById(id, updateData);
+return res.status(200).json(updatedRestaurant);
+ }catch (error){
+return res.status(500).json({error: error.message});
+ }
+};
+const deleteRestaurant = async ( req, res) => {
+  try{
+    const restaurantId = req.params.id;
+    const restaurant = await restaurantService.softDeleteRestaurant(restaurantId);
+    res.status(200).json({ message: "Restaurant marqué comme supprimé avec succès", restaurant});
+  }catch (error){
+    res.status(500).json({ message: error.message || "erreur lors de la suppression du restaurant "});
+  }
+};
 module.exports = {
    createRestaurant,
    getAllRestaurants, 
    getRestaurantById,
+   updateRestaurant,
+   deleteRestaurant,
   };

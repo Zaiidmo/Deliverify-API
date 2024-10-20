@@ -50,9 +50,9 @@ return{
   name: restaurant.name,
   address: restaurant.address,
   phoneNumber: restaurant.phoneNumber,
-  logo: restaurant.logo || 'default-restaurant.jpg', // valeur par défaut
-  cover: restaurant.cover || 'default-restaurant-cover.jpg', // valeur par défaut
-  images: restaurant.images || [], // tableau vide par défaut
+  logo: restaurant.logo || 'default-restaurant.jpg', 
+  cover: restaurant.cover || 'default-restaurant-cover.jpg',
+  images: restaurant.images || [], 
   category: restaurant.category,
   openAt: restaurant.openAt,
   closeAt: restaurant.closeAt,
@@ -63,8 +63,50 @@ return{
   }
 
 };
+
+const updateRestaurantById = async (id , updateData) => {
+  try {
+    const restaurant = await Restaurant.findById(id);
+    if(!restaurant){
+      throw new Error('Restaurant non trouvé');
+    }
+    restaurant.name = updateData.name ?? restaurant.name;
+    restaurant.address = updateData.address ?? restaurant.address;
+    restaurant.phoneNumber = updateData.phoneNumber ?? restaurant.phoneNumber;
+    restaurant.logo = updateData.logo ?? restaurant.logo;
+    restaurant.cover= updateData.cover ?? restaurant.cover;
+    restaurant.images = updateData.images.length > 0 ? updateData.images : restaurant.images;
+    restaurant.openAt = updateData.openAt ?? restaurant.openAt;
+    restaurant.closeAt = updateData.closeAt ?? restaurant.closeAt;
+    restaurant.category = updateData.category ?? restaurant.category;
+    
+
+    await restaurant.save();
+
+    return restaurant;
+  }catch (error){
+    throw new Error (error.message);
+  }
+};
+
+const softDeleteRestaurant = async (id) =>{
+  try{
+    const restaurant = await Restaurant.findById(id);
+    if(!restaurant){
+      throw new Error('Restaurant non trouvé');
+    }
+
+    restaurant.isDeleted = true;
+    await restaurant.save();
+    return restaurant;
+  }catch (error){
+    throw new Error(error.message)
+  }
+}
 module.exports = {
   createRestaurant,
   getAllRestaurants,
   getRestaurantById,
+  updateRestaurantById,
+  softDeleteRestaurant,
 };

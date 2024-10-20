@@ -1,6 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { createRestaurant, getAllRestaurants, getRestaurantById } = require("../controllers/restaurantController");
+const { createRestaurant, getAllRestaurants, getRestaurantById, updateRestaurant, deleteRestaurant} = require("../controllers/restaurantController");
 const { validateRestaurant, validateFileSize } = require("../validations/restaurantValidation");
 const upload = require("../config/multer");
 
@@ -24,5 +24,13 @@ const validateRestaurantMiddleware = (req, res, next) => {
 
 router.get("/", getAllRestaurants);
 router.get("/:id", getRestaurantById);
+
+router.put("/:id",
+  //  authMiddleware,
+   updateRestaurant);
+
+router.delete("/:id", 
+  // authMiddleware,
+   deleteRestaurant);
 
 module.exports = router;

@@ -76,6 +76,10 @@ const restaurantSchema =  new mongoose.Schema({
         type: Boolean,  
         default: false,
       },
+      isDeleted: {
+        type: Boolean,
+        default: false, 
+      },
 });
 restaurantSchema.pre("save", function (next) {
     if (this.images.length > 5) {
