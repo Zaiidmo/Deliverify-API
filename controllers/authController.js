@@ -33,7 +33,6 @@ const register = async (req, res) => {
       fullname,
       username,
       email,
-      CIN,
       phoneNumber,
       password,
       CIN,
@@ -77,7 +76,6 @@ const register = async (req, res) => {
       fullname,
       username,
       email,
-      CIN,
       phoneNumber,
       password: hashedPassword,
       CIN,
@@ -88,15 +86,11 @@ const register = async (req, res) => {
     await newUser.save();
 
     try {
-      await logService.userRegistration(newUser._id, newUser.username);
+      await logService.addLog(newUser._id,"USER_REGISTER",{username : username, fullname : fullname.fname + " " + fullname.lname});
     } catch (logError) {
       console.error("Error durring add user action to Logs :", logError);
     }
-
-
-    if(logService.userRegistration){
-      console.log("User log successful!");
-    }   
+  
     const verificationToken = jwtService.generateVerificationToken(newUser._id);
     console.log("Sending verification email to:", email);
     await mailService.sendVerificationEmail(
@@ -193,6 +187,13 @@ const login = async (req, res) => {
           },
           accessToken,
         });
+
+        try {
+          await logService.addLog(user._id,"USER_LOGIN",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+        } catch (logError) {
+          console.error("Error durring add user action to Logs :", logError);
+        }
+
     } else {
       // Generate and send OTP for 2FA
       const otpCode = otpService.generateOTP();
@@ -211,8 +212,8 @@ const login = async (req, res) => {
       });
     }
   } catch (err) {
-    // console.error(err);
-    res.status(500).json({ message: "Server error." });
+     console.error(err);
+    res.status(500).json({  message: "Server error. " + err.message  });
   }
 };
 
