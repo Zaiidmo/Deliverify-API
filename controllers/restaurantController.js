@@ -28,7 +28,18 @@ try{
 }
 };
 
+const getRestaurantById = async (req, res) =>{
+const {id} = req.params;
+try {
+  const restaurant = await restaurantService.getRestaurantById(id);
+  return res.status(200).json(restaurant);
+}catch (error) {return res.status(404).json({ error: error.message});
+
+}
+};
+
 module.exports = {
    createRestaurant,
    getAllRestaurants, 
+   getRestaurantById,
   };

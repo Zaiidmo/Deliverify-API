@@ -1,8 +1,9 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { createRestaurant, getAllRestaurants } = require("../controllers/restaurantController");
+const { createRestaurant, getAllRestaurants, getRestaurantById } = require("../controllers/restaurantController");
 const { validateRestaurant, validateFileSize } = require("../validations/restaurantValidation");
 const upload = require("../config/multer");
+
 
 
 const router = express.Router();
@@ -21,6 +22,7 @@ const validateRestaurantMiddleware = (req, res, next) => {
     res.json({ message: 'Fichier téléchargé avec succès!', file: req.file });
 });
 
-router.get("/", getAllRestaurants)
+router.get("/", getAllRestaurants);
+router.get("/:id", getRestaurantById);
 
 module.exports = router;
