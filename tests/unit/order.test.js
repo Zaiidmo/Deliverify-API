@@ -14,7 +14,7 @@ jest.mock("../../models/User");
 jest.mock("../../models/Item");
 jest.mock("../../services/socketService");
 
-describe("Order Controller - Purchase Function", () => {
+describe("Order Controller ", () => {
   let req, res;
 
   beforeEach(() => {
@@ -152,6 +152,75 @@ describe("Order Controller - Purchase Function", () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: "Internal Server Error: Payment error",
+      });
+    });
+  });
+
+  describe("getOrderStatus", () => {
+    beforeEach(() => {
+      req = {
+        headers: {
+          authorization: "Bearer valid_token",
+        },
+        body: {},
+      };
+      res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+    });
+
+    it("should return 401 if no token is provided", async () => {
+      req.headers.authorization = undefined;
+
+      await orderController.getOrderStatus(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: Missing token" });
+    });
+
+    it("should return 401 if an invalid token is provided", async () => {
+      jwtService.verifyToken.mockReturnValue(null);
+
+      await orderController.getOrderStatus(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ message: "Unauthorized: Invalid token" });
+    });
+
+    it("should return 404 if no orders are found for the user", async () => {
+      const mockUser = { _id: "userId123" };
+      jwtService.verifyToken.mockReturnValue(mockUser);
+      Order.find.mockResolvedValue([]); // Ensure it returns an empty array
+
+      await orderController.getOrderStatus(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ message: "No orders found" });
+  });
+
+  it("should return 200 and the order status if orders are found", async () => {
+      const mockOrders = [{ id: "orderId123", status: "Pending" }];
+      const mockUser = { _id: "userId123" };
+      jwtService.verifyToken.mockReturnValue(mockUser);
+      Order.find.mockResolvedValue(mockOrders); // Ensure it returns mock orders
+
+      await orderController.getOrderStatus(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({ orders: mockOrders });
+  });
+
+    it("should return 500 if an error occurs", async () => {
+      const mockUser = { _id: "userId123" };
+      jwtService.verifyToken.mockReturnValue(mockUser);
+      Order.find.mockRejectedValue(new Error("Database error"));
+
+      await orderController.getOrderStatus(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Internal Server Error: Database error",
       });
     });
   });
