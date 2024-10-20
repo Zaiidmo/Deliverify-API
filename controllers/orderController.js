@@ -99,7 +99,7 @@ const getOrderStatus = async (req, res) => {
         const userId = decoded._id;
 
         const orders = await Order.find({ user: userId });
-        if (!orders) {
+        if (!orders || orders.length === 0) {
             return res.status(404).json({ message: 'No orders found' });
         }
         return res.status(200).json({ orders });
