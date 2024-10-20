@@ -18,9 +18,9 @@ const validateRestaurant = (data) => {
       }
     }
   
-    // if (!data.logo || typeof data.logo !== 'string') {
-    //   errors.push("Logo is required and must be a string");
-    // }
+    if (!data.logo || typeof data.logo !== 'string') {
+      errors.push("Logo is required and must be a string");
+    }
   
     if (data.images) {
         if (!Array.isArray(data.images)) {
@@ -60,31 +60,31 @@ const validateRestaurant = (data) => {
     };
   };
   
-  // const validateFileSize = (req, res, next) => {
-  //   const maxSize = 1024 * 1024 * 5; 
-  //   const files = req.files; 
+  const validateFileSize = (req, res, next) => {
+    const maxSize = 1024 * 1024 * 5; 
+    const files = req.files; 
  
-  //   if (files.logo && files.logo.size > maxSize) {
-  //     return res.status(400).json({ message: "Logo must be less than 5MB" });
-  //   }
+    if (files.logo && files.logo.size > maxSize) {
+      return res.status(400).json({ message: "Logo must be less than 5MB" });
+    }
     
-  //   if (files.cover && files.cover.size > maxSize) {
-  //     return res.status(400).json({ message: "Cover must be less than 5MB" });
-  //   }
+    if (files.cover && files.cover.size > maxSize) {
+      return res.status(400).json({ message: "Cover must be less than 5MB" });
+    }
   
-  //   if (files.images) {
-  //     if (files.images.length > 5) {
-  //       return res.status(400).json({ message: "You can upload a maximum of 5 images" });
-  //     }
-  //     for (let image of files.images) {
-  //       if (image.size > maxSize) {
-  //         return res.status(400).json({ message: "Each image must be less than 5MB" });
-  //       }
-  //     }
-  //   }
+    if (files.images) {
+      if (files.images.length > 5) {
+        return res.status(400).json({ message: "You can upload a maximum of 5 images" });
+      }
+      for (let image of files.images) {
+        if (image.size > maxSize) {
+          return res.status(400).json({ message: "Each image must be less than 5MB" });
+        }
+      }
+    }
   
-  //   next();
-  // };
+    next();
+  };
   
-  module.exports = { validateRestaurant };
+  module.exports = { validateRestaurant, validateFileSize };
   

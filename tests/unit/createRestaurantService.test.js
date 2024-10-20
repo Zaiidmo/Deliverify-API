@@ -1,11 +1,11 @@
-const { createRestaurantService } = require('../../services/restaurantService');
+const { createRestaurant } = require('../../services/restaurantService');
 const User = require('../../models/User');
 const Restaurant = require('../../models/Restaurant');
 
 jest.mock('../../models/Restaurant');
 jest.mock('../../models/User');
 
-describe('createRestaurantService', () => {
+describe('createRestaurant', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -41,7 +41,7 @@ describe('createRestaurantService', () => {
       this.save = jest.fn().mockResolvedValue(this); // Renvoie l'instance pour la sauvegarde
     });
 
-    const restaurant = await createRestaurantService(restaurantData);
+    const restaurant = await createRestaurant(restaurantData);
 
     expect(restaurant.logo).toBe('default-restaurant.jpg');
     expect(restaurant.cover).toBe('default-cover.jpg');
@@ -57,7 +57,7 @@ describe('createRestaurantService', () => {
       name: 'Test Restaurant',
     };
 
-    await expect(createRestaurantService(restaurantData)).rejects.toThrow('Propriétaire non trouvé');
+    await expect(createRestaurant(restaurantData)).rejects.toThrow('Propriétaire non trouvé');
   });
 
   test('devrait créer un restaurant avec les données fournies', async () => {
@@ -94,7 +94,7 @@ describe('createRestaurantService', () => {
       this.save = jest.fn().mockResolvedValue(this); // Renvoie l'instance pour la sauvegarde
     });
 
-    const restaurant = await createRestaurantService(restaurantData);
+    const restaurant = await createRestaurant(restaurantData);
 
     expect(restaurant.logo).toBe('custom-logo.jpg');
     expect(restaurant.cover).toBe('custom-cover.jpg');

@@ -1,11 +1,11 @@
-const { createRestaurantService } = require("../services/restaurantService");
+const restaurantService = require("../services/restaurantService");
 
 const createRestaurant = async (req, res) => {
   console.log("Received request to create restaurant:", req.body);
   try {
     const restaurantData = req.body;
 
-    const newRestaurant = await createRestaurantService(restaurantData);
+    const newRestaurant = await restaurantService.createRestaurant(restaurantData);
 
     res.status(201).json({
       message: "Restaurant créé avec succès",
@@ -18,4 +18,17 @@ const createRestaurant = async (req, res) => {
   }
 };
 
-module.exports = { createRestaurant };
+const getAllRestaurants = async (req,res) => {
+try{
+  const restaurants = await restaurantService.getAllRestaurants();
+  return res.status(200).json(restaurants);
+}catch(error) {
+  return res.status(500).json({error : error.message});
+
+}
+};
+
+module.exports = {
+   createRestaurant,
+   getAllRestaurants, 
+  };
