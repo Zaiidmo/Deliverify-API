@@ -7,7 +7,6 @@ const orderService = {
     try {
       const order = new Order(orderData);
       await order.save();
-      await activityService.logOrderPlaced(order.user, order._id, order.totalAmount);
       return order;
     } catch (error) {
       console.error('Error creating order:', error);
