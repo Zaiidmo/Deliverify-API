@@ -1,3 +1,4 @@
+//services/logService.js
 const Log = require("../models/Log");
 
 const logService = {
