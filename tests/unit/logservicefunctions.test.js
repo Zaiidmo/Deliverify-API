@@ -1,8 +1,10 @@
+//tests\unit\logservicefunctions.test.js
 const logService = require('../../services/logService');
 const Log = require('../../models/Log');
 
 // Mock dependencies
 jest.mock('../../models/Log');
+
 
 describe('Log Service', () => {
   afterEach(() => {
