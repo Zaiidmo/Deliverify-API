@@ -130,17 +130,74 @@ const seedDatabase = async () => {
       name: "Restaurant 1",
       address: "Address 1",
       phoneNumber: "1122334455",
-      website: "",
-      description: "Description 1",
+      logo: "path/to/logo1.jpg", // Chemin vers le logo
+      cover: "path/to/cover1.jpg", // Chemin vers la couverture
+      images: [
+        "path/to/image1.jpg",
+        "path/to/image2.jpg",
+        "path/to/image3.jpg",
+        "path/to/image4.jpg",
+      ], // Liste des images
       owner: initialUsers[2]._id,
       openAt: "08:00",
       closeAt: "22:00",
-      category : {
+      category: {
         name: "Fast Food",
-        description: "Fast Food"
+        description: "Fast Food",
+      },
+      location: {
+        type: "Point",
+        coordinates: [40.712776, -74.005974], // Exemple de coordonnées
+      },
+    },
+    {
+      name: "Restaurant 2",
+      address: "Address 2",
+      phoneNumber: "2233445566",
+      logo: "path/to/logo2.jpg",
+      cover: "path/to/cover2.jpg",
+      images: [
+        "path/to/image5.jpg",
+        "path/to/image6.jpg",
+        "path/to/image7.jpg",
+        "path/to/image8.jpg",
+      ],
+      owner: initialUsers[1]._id,
+      openAt: "10:00",
+      closeAt: "23:00",
+      category: {
+        name: "Italian",
+        description: "Italian Cuisine",
+      },
+      location: {
+        type: "Point",
+        coordinates: [34.052235, -118.243683],
+      },
+    },
+    {
+      name: "Restaurant 3",
+      address: "Address 3",
+      phoneNumber: "3344556677",
+      logo: "path/to/logo3.jpg",
+      cover: "path/to/cover3.jpg",
+      images: [
+        "path/to/image9.jpg",
+        "path/to/image10.jpg",
+      ],
+      owner: initialUsers[0]._id,
+      openAt: "09:00",
+      closeAt: "21:00",
+      category: {
+        name: "Chinese",
+        description: "Chinese Cuisine",
+      },
+      location: {
+        type: "Point",
+        coordinates: [51.507351, -0.127758],
       },
     },
   ]);
+
   const initialItem = await Item.insertMany([
     {
       name: "Item 1",

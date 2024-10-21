@@ -3,18 +3,29 @@ const Restaurant = require("../models/Restaurant");
 
 const createRestaurantWithItems = async (req, res) => {
   try {
-    const restaurant = new Restaurant(req.bady);
+    // Extract restaurant details and items from the request body
+    const { items, ...restaurantData } = req.body;
+
+    // Create and save the restaurant
+    const restaurant = new Restaurant(restaurantData);
     await restaurant.save();
-    // create items for that restaurant
-    for (let i = 0; i < req.body.items.length; i++) {
-      const item = new Item(req.bady.item[i]);
-      item.restaurant = restaurant._id;
+
+    // Create and save each item linked to the newly created restaurant
+    for (let i = 0; i < items.length; i++) {
+      const item = new Item({
+        ...items[i],
+        restaurant: restaurant._id,
+      });
       await item.save();
     }
-    res
-      .status(201)
-      .json({ message: "Restaurant created successfully", restaurant });
+
+    // Return a success response
+    res.status(201).json({
+      message: "Restaurant and items created successfully",
+      restaurant,
+    });
   } catch (error) {
+    // Handle errors and return an error response
     res.status(500).json({ message: error.message });
   }
 };

@@ -38,7 +38,7 @@ describe('createRestaurant', () => {
       this.logo = this.logo || 'default-restaurant.jpg';
       this.cover = this.cover || 'default-cover.jpg';
       this.images = this.images || [];
-      this.save = jest.fn().mockResolvedValue(this); // Renvoie l'instance pour la sauvegarde
+      this.save = jest.fn().mockResolvedValue(this); 
     });
 
     const restaurant = await createRestaurant(restaurantData);
@@ -50,7 +50,7 @@ describe('createRestaurant', () => {
   });
 
   test('devrait lever une erreur si le propriétaire n\'existe pas', async () => {
-    User.findById.mockResolvedValue(null); // Simule un propriétaire inexistant
+    User.findById.mockResolvedValue(null); 
 
     const restaurantData = {
       owner: 'nonexistentOwner',

@@ -1,89 +1,162 @@
-//tests\unit\orderConfirm.test.js
-const { expect } = require('chai');
-const sinon = require('sinon');
-const jwtService = require('../services/jwtService');
-const Order = require('../models/Order');
-const orderController = require('../controllers/orderController');
+const orderController = require('../../controllers/orderController');
+const User = require('../../models/User');
+const Order = require('../../models/Order');
+const jwtService = require('../../services/jwtService');
 
-describe('Order Controller - confirmDelivery', () => {
-    let req, res, next;
+// Mock dependencies
+jest.mock('../../models/User');
+jest.mock('../../models/Order');
+jest.mock('../../services/jwtService');
 
-    beforeEach(() => {
-        req = {
-            headers: {
-                authorization: 'Bearer validToken'
-            },
-            body: {
-                orderId: 'validOrderId'
-            }
-        };
+describe('Delivery Controller - Confirm Delivery', () => {
+  let req, res;
 
-        res = {
-            status: sinon.stub().returnsThis(),
-            json: sinon.stub()
-        };
+  beforeEach(() => {
+    req = {
+      headers: {},
+      body: {},
+    };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+  });
 
-        next = sinon.spy();
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('confirmDelivery', () => {
+    it('should return 401 if no token is provided', async () => {
+      req.headers.authorization = '';
+
+      await orderController.confirmDelivery(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized: Missing token' });
     });
 
-    afterEach(() => {
-        sinon.restore();
+    it('should return 401 if the token is invalid', async () => {
+      req.headers.authorization = 'Bearer invalidtoken';
+      jwtService.verifyToken.mockReturnValue(null);
+
+      await orderController.confirmDelivery(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized: Invalid token' });
     });
 
-    it('should return 401 if token is missing', async () => {
-        req.headers.authorization = undefined;
+    it('should return 403 if user is not a delivery person', async () => {
+      req.headers.authorization = 'Bearer validtoken';
+      const decodedToken = { _id: 'user_id' };
+      jwtService.verifyToken.mockReturnValue(decodedToken);
+      
+      // Mock a user without the Delivery role
+      User.findById.mockImplementation(() => ({
+        populate: jest.fn().mockReturnValue({ roles: [{ name: 'Customer' }] }),
+      }));
 
-        await orderController.confirmDelivery(req, res, next);
+      await orderController.confirmDelivery(req, res);
 
-        expect(res.status.calledWith(401)).to.be.true;
-        expect(res.json.calledWith({ message: 'Unauthorized: Missing token' })).to.be.true;
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Forbidden: Only Delivery Persons' });
     });
 
-    it('should return 401 if token is invalid', async () => {
-        sinon.stub(jwtService, 'verifyToken').returns(null);
+    it('should return 404 if the order is not found', async () => {
+      req.headers.authorization = 'Bearer validtoken';
+      req.body = { orderId: 'invalidOrderId', OtpConfirm: '123456' };
 
-        await orderController.confirmDelivery(req, res, next);
+      const decodedToken = { _id: 'user_id' };
+      jwtService.verifyToken.mockReturnValue(decodedToken);
+      User.findById.mockImplementation(() => ({
+        populate: jest.fn().mockReturnValue({ roles: [{ name: 'Delivery' }] }),
+      }));
+      Order.findById.mockResolvedValue(null);
 
-        expect(res.status.calledWith(401)).to.be.true;
-        expect(res.json.calledWith({ message: 'Unauthorized: Invalid token' })).to.be.true;
+      await orderController.confirmDelivery(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Order not found' });
     });
 
-    it('should return 404 if order is not found', async () => {
-        sinon.stub(jwtService, 'verifyToken').returns({ _id: 'userId' });
-        sinon.stub(Order, 'findById').returns(null);
+    it('should return 400 if the OTP is invalid', async () => {
+      req.headers.authorization = 'Bearer validtoken';
+      req.body = { orderId: 'validOrderId', OtpConfirm: 'wrongOtp' };
 
-        await orderController.confirmDelivery(req, res, next);
+      const decodedToken = { _id: 'user_id' };
+      jwtService.verifyToken.mockReturnValue(decodedToken);
+      const mockUser = {
+        _id: 'user_id',
+        roles: [{ name: 'Delivery' }],
+      };
+      const mockOrder = {
+        _id: 'validOrderId',
+        otpConfirm: 'correctOtp',
+      };
+      User.findById.mockImplementation(() => ({
+        populate: jest.fn().mockReturnValue(mockUser),
+      }));
+      Order.findById.mockResolvedValue(mockOrder);
 
-        expect(res.status.calledWith(404)).to.be.true;
-        expect(res.json.calledWith({ message: 'Order not found' })).to.be.true;
+      await orderController.confirmDelivery(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Invalid OTP' });
     });
 
-    it('should confirm delivery successfully', async () => {
-        const mockOrder = {
-            _id: 'validOrderId',
-            isDelivered: false,
-            save: sinon.stub().resolves()
-        };
+    it('should confirm delivery and update order status', async () => {
+      req.headers.authorization = 'Bearer validtoken';
+      req.body = { orderId: 'validOrderId', OtpConfirm: 'correctOtp' };
 
-        sinon.stub(jwtService, 'verifyToken').returns({ _id: 'userId' });
-        sinon.stub(Order, 'findById').returns(mockOrder);
+      const decodedToken = { _id: 'user_id' };
+      jwtService.verifyToken.mockReturnValue(decodedToken);
+      const mockUser = {
+        _id: 'user_id',
+        roles: [{ name: 'Delivery' }],
+      };
+      const mockOrder = {
+        _id: 'validOrderId',
+        otpConfirm: 'correctOtp',
+        status: 'Pending',
+        save: jest.fn().mockResolvedValue(true), // Mock save function
+      };
+      User.findById.mockImplementation(() => ({
+        populate: jest.fn().mockReturnValue(mockUser),
+      }));
+      Order.findById.mockResolvedValue(mockOrder);
 
-        await orderController.confirmDelivery(req, res, next);
+      await orderController.confirmDelivery(req, res);
 
-        expect(mockOrder.isDelivered).to.be.true;
-        expect(mockOrder.save.calledOnce).to.be.true;
-        expect(res.status.calledWith(200)).to.be.true;
-        expect(res.json.calledWith({ message: 'Delivery confirmed successfully', order: mockOrder })).to.be.true;
+      expect(mockOrder.status).toBe('Delivered'); // Make sure to set this in the actual controller
+      expect(mockOrder.save).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Delivery confirmed successfully',
+        order: mockOrder,
+      });
     });
 
-    it('should handle internal server error', async () => {
-        const errorMessage = 'Internal Server Error';
-        sinon.stub(jwtService, 'verifyToken').returns({ _id: 'userId' });
-        sinon.stub(Order, 'findById').throws(new Error(errorMessage));
+    it('should return 500 if an error occurs', async () => {
+      req.headers.authorization = 'Bearer validtoken';
+      req.body = { orderId: 'validOrderId', OtpConfirm: 'correctOtp' };
 
-        await orderController.confirmDelivery(req, res, next);
+      const decodedToken = { _id: 'user_id' };
+      jwtService.verifyToken.mockReturnValue(decodedToken);
+      const mockUser = {
+        _id: 'user_id',
+        roles: [{ name: 'Delivery' }],
+      };
+      User.findById.mockImplementation(() => ({
+        populate: jest.fn().mockReturnValue(mockUser),
+      }));
+      Order.findById.mockRejectedValue(new Error('Database error')); // Simulate an error
 
-        expect(res.status.calledWith(500)).to.be.true;
-        expect(res.json.calledWith({ message: `Internal Server Error: ${errorMessage}` })).to.be.true;
+      await orderController.confirmDelivery(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Internal Server Error: Database error',
+      });
     });
+  });
 });
