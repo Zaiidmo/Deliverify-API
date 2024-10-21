@@ -15,12 +15,11 @@ const http = require('http');
 const cors = require('cors');
 const initializeSocketServer = require('./socket-server');
 const socketService = require('./services/socketService');
+const searchRoutes = require('./routes/search');
 const itemRoutes = require('./routes/item');
 const mealRoutes = require('./routes/meal');
 const userRoutes = require('./routes/user');
 const searchRoutes = require('./routes/search');
-
-
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
