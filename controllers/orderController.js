@@ -124,19 +124,18 @@ const confirmDelivery = async (req, res) => {
 
         const { orderId } = req.body; // Assuming you send the order ID in the request body
 
-        // Find the order by ID
         const order = await Order.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        // Check if the order belongs to the user
-        // if (!order.user.equals(decoded._id)) {
-        //     return res.status(403).json({ message: 'Forbidden: You do not have permission to confirm this order' });
-        // }
+       
+         if (!order.user.equals(decoded._id)) {
+            return res.status(403).json({ message: 'Forbidden: You do not have permission to confirm this order' });
+         }
 
         // Update the order's delivery confirmation status
-        order.isDelivered = true;
+        order.status="Delivered";
         await order.save();
 
         return res.status(200).json({ message: 'Delivery confirmed successfully', order });
