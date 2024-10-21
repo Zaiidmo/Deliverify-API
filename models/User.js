@@ -110,6 +110,5 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Export the User model without passwordService
 const User = mongoose.model('User', userSchema);
 module.exports = User;
