@@ -18,9 +18,10 @@ const validateRestaurant = (data) => {
       }
     }
   
-    if (!data.logo || typeof data.logo !== 'string') {
-      errors.push("Logo is required and must be a string");
+    if (data.logo && typeof data.logo !== 'string') {
+      errors.push("Logo must be a string if provided");
     }
+    
   
     if (data.images) {
         if (!Array.isArray(data.images)) {
@@ -62,7 +63,7 @@ const validateRestaurant = (data) => {
   
   const validateFileSize = (req, res, next) => {
     const maxSize = 1024 * 1024 * 5; 
-    const files = req.files; 
+    const files = req.files|| {}; 
  
     if (files.logo && files.logo.size > maxSize) {
       return res.status(400).json({ message: "Logo must be less than 5MB" });

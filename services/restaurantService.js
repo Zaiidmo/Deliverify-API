@@ -20,7 +20,7 @@ const createRestaurant= async (restaurantData) => {
     openAt,
     closeAt,
     category,
-    owner,
+    owner
   });
 
   await newRestaurant.save();
