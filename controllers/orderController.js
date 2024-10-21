@@ -184,7 +184,7 @@ const confirmDelivery = async (req, res) => {
         return res.status(401).json({ message: "Unauthorized: Invalid token" });
       }
   
-      const user = await User.findById(decoded._id).populate("roles");
+      const user = await User.findById(decoded._id);
       if (!user || !user.roles.some((role) => role.name === "Delivery" || role.name === "Admin")) {
         return res.status(403).json({ message: "Forbidden: Only Delivery Persons" });
       }
