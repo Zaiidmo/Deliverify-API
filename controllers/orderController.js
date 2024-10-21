@@ -106,6 +106,42 @@ const getOrderStatus = async (req, res) => {
     } catch (error) {
         console.error('Error getting order status:', error);
         return res.status(500).json({ message: 'Internal Server Error: ' + error.message });
+    }  
+};
+
+
+const confirmDelivery = async (req, res) => {
+    try {
+        const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ message: 'Unauthorized: Missing token' });
+        }
+
+        const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
+        if (!decoded) {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        const { orderId } = req.body; // Assuming you send the order ID in the request body
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+       
+         if (!order.user.equals(decoded._id)) {
+            return res.status(403).json({ message: 'Forbidden: You do not have permission to confirm this order' });
+         }
+
+        // Update the order's delivery confirmation status
+        order.status="Delivered";
+        await order.save();
+
+        return res.status(200).json({ message: 'Delivery confirmed successfully', order });
+    } catch (error) {
+        console.error('Error confirming delivery:', error);
+        return res.status(500).json({ message: 'Internal Server Error: ' + error.message });
     }
 };
-module.exports = { purchase, getOrderStatus };
+module.exports = { purchase, getOrderStatus, confirmDelivery };
