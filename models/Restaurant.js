@@ -35,6 +35,7 @@ const restaurantSchema =  new mongoose.Schema({
     images: [
         {
             type: String,
+            default: [],
         },
     ],
     location: {
@@ -70,8 +71,24 @@ const restaurantSchema =  new mongoose.Schema({
             required: [true, "Category description is required"],
             trim: true,
         },
-    }    
+    }, 
+    isApprouved: {
+        type: Boolean,  
+        default: false,
+      },
+      isDeleted: {
+        type: Boolean,
+        default: false, 
+      },
 });
+restaurantSchema.pre("save", function (next) {
+    if (this.images.length > 5) {
+        return next(new Error("You cannot upload more than 5 images!"));
+    }
+    next();
+});
+restaurantSchema.index({ location: '2dsphere' });
+restaurantSchema.index({ name: 'text', category: 'text'});
 
 const Restaurant = mongoose.model('Restaurant', restaurantSchema);
 module.exports = Restaurant;

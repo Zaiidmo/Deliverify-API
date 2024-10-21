@@ -20,7 +20,7 @@ const createRestaurant= async (restaurantData) => {
     openAt,
     closeAt,
     category,
-    owner,
+    owner
   });
 
   await newRestaurant.save();
@@ -30,7 +30,7 @@ const createRestaurant= async (restaurantData) => {
 
 
 const getAllRestaurants = async() => {
-  const restaurants = await Restaurant.find();
+  const restaurants = await Restaurant.find({isDeleted: false, isApprouved: true});
   return restaurants.map(restaurant => ({
     ...restaurant,
     logo: restaurant.logo || 'default-restaurant.jpg', 
@@ -41,7 +41,7 @@ const getAllRestaurants = async() => {
 
 const getRestaurantById = async(id) =>{
   try {
-const restaurant = await Restaurant.findById(id);
+const restaurant = await Restaurant.findById({_id: id, isDeleted: false});
 if(!restaurant){
   throw new Error ('Restaurant non trouvé');
 }
@@ -110,3 +110,4 @@ module.exports = {
   updateRestaurantById,
   softDeleteRestaurant,
 };
+
