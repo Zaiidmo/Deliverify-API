@@ -35,6 +35,10 @@ const orderSchema = new mongoose.Schema({
     paymentId: {
         type: "String",
         required: true
+    },
+    isDelivered: {
+        type: Boolean,
+        default: false, 
     }
 });
 
