@@ -3,8 +3,6 @@ const restaurantService = require("../services/restaurantService");
 const createRestaurant = async (req, res) => {
   try {  
     const restaurantData = req.body;
-    
-    
     const newRestaurant = await restaurantService.createRestaurant(restaurantData);
 
     res.status(201).json({
