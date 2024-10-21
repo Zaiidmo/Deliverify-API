@@ -6,6 +6,7 @@ const User = require("../models/User");
 const Role = require("../models/Role");
 const { validateRegistration } = require("../validations/authValidations");
 const deviceService = require("../services/deviceService");
+const logService  = require("../services/logService");
 
 // Helper function to find existing user by fields
 const findExistingUser = async (username, email, phoneNumber) => {
@@ -35,6 +36,7 @@ const register = async (req, res) => {
       CIN,
       phoneNumber,
       password,
+      CIN,
       roles: roleNames,
     } = req.body;
 
@@ -75,15 +77,22 @@ const register = async (req, res) => {
       fullname,
       username,
       email,
-      CIN,
       phoneNumber,
+      CIN,
       password: hashedPassword,
+      CIN,
       roles: roles.map((role) => role._id),
       isVerified: false,
     });
 
     await newUser.save();
 
+    try {
+      await logService.addLog(newUser._id,"USER_REGISTER",{username : username, fullname : fullname.fname + " " + fullname.lname});
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
+  
     const verificationToken = jwtService.generateVerificationToken(newUser._id);
     console.log("Sending verification email to:", email);
     await mailService.sendVerificationEmail(
@@ -180,6 +189,13 @@ const login = async (req, res) => {
           },
           accessToken,
         });
+
+        try {
+          await logService.addLog(user._id,"USER_LOGIN",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+        } catch (logError) {
+          console.error("Error durring add user action to Logs :", logError);
+        }
+
     } else {
       // Generate and send OTP for 2FA
       const otpCode = otpService.generateOTP();
@@ -198,8 +214,8 @@ const login = async (req, res) => {
       });
     }
   } catch (err) {
-    // console.error(err);
-    res.status(500).json({ message: "Server error." });
+     console.error(err);
+    res.status(500).json({  message: "Server error. " + err.message  });
   }
 };
 

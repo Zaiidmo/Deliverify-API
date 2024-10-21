@@ -23,6 +23,10 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
+    otpConfirm : {
+        type: String,
+        required: true
+    },
     status: {
         type: String,
         enum: ["Pending", "Paid","failedPayment" , "Preparing", "Accepted", "Picked_up","Reported ", "Delivered", "Cancelled"],
@@ -36,6 +40,7 @@ const orderSchema = new mongoose.Schema({
         type: "String",
         required: true
     }
+    
 });
 
 const Order = mongoose.model("Order", orderSchema);
