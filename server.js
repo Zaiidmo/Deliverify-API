@@ -4,6 +4,7 @@ const connectDB = require('./config/db');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const verificationRoutes = require('./routes/verifyEmail');
+const userRoutes = require('./routes/user');
 
 const app = express();
 const cors = require('cors');
@@ -27,6 +28,7 @@ app.use(bodyParser.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/verify', verificationRoutes);
+app.use("/api/user", userRoutes);
 
 // Start the Server
 if (require.main === module) {
