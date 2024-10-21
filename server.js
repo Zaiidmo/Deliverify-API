@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const restaurantRoutes = require('./routes/restaurant');
 const verificationRoutes = require('./routes/verifyEmail');
+const userRoutes = require('./routes/user');
 const statisticsRoutes = require('./routes/statistics');
 const roleRoutes = require('./routes/role')
 const verificationRoutes = require('./routes/verifyEmail');
