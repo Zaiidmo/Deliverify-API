@@ -5,7 +5,6 @@ const jwtService = require('../services/jwtService');
 const Order = require('../models/Order');
 const orderController = require('../controllers/orderController');
 
-
 describe('Order Controller - confirmDelivery', () => {
     let req, res, next;
 
