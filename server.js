@@ -12,6 +12,7 @@ const http = require('http');
 const cors = require('cors');
 const initializeSocketServer = require('./socket-server');
 const socketService = require('./services/socketService');
+const itemRoutes = require('./routes/item');
 
 const app = express();
 const server = http.createServer(app);
@@ -36,7 +37,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/verify', verificationRoutes);
 app.use('/api/order', orderRoutes(socketService.io));
 app.use('/api/webhooks', webHooksRoutes);
-app.use('/api/roles', roleRoutes)
+app.use('/api/roles', roleRoutes);
+app.use("/api/item", itemRoutes);
 
 // Initialize Socket.IO server
 const io = initializeSocketServer(server);
