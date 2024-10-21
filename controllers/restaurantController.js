@@ -4,7 +4,6 @@ const createRestaurant = async (req, res) => {
   console.log("Received request to create restaurant:", req.body);
   try {
     const restaurantData = req.body;
-    restaurantData.owner = req.user._id; 
 
     const newRestaurant = await restaurantService.createRestaurant(restaurantData);
 

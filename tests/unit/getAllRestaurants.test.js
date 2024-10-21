@@ -70,4 +70,3 @@ describe("Restaurant Service - getAllRestaurants", () => {
     expect(Restaurant.find).toHaveBeenCalledTimes(1);
   });
 });
-

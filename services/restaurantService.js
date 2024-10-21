@@ -41,7 +41,9 @@ const getAllRestaurants = async() => {
 
 const getRestaurantById = async(id) =>{
   try {
+
 const restaurant = await Restaurant.findById({_id: id, isDeleted: false});
+
 if(!restaurant){
   throw new Error ('Restaurant non trouvé');
 }
@@ -110,4 +112,3 @@ module.exports = {
   updateRestaurantById,
   softDeleteRestaurant,
 };
-

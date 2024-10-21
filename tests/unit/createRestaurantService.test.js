@@ -102,4 +102,3 @@ describe('createRestaurant', () => {
     expect(restaurant.save).toHaveBeenCalled();
   });
 });
-

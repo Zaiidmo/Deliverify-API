@@ -17,7 +17,7 @@ const validateRestaurant = (data) => {
         errors.push("Phone number must be between 10 and 14 digits");
       }
     }
-  
+
     if (data.logo && typeof data.logo !== 'string') {
       errors.push("Logo must be a string if provided");
     }
