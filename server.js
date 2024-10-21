@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const roleRoutes = require('./routes/role')
 const verificationRoutes = require('./routes/verifyEmail');
 const orderRoutes = require('./routes/order');
+const logsRoutes = require('./routes/logs');
 const webHooksRoutes = require('./routes/webhooks');
 const http = require('http');
 const cors = require('cors');
@@ -32,6 +33,7 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Routes
+app.use('/api/logs', logsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/verify', verificationRoutes);
 app.use('/api/order', orderRoutes(socketService.io));
