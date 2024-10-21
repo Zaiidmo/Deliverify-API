@@ -85,34 +85,12 @@ describe("Manage Item Controller (without database)", () => {
 
   // Test POST /createItem
   describe("POST /createItem", () => {
-      it("should create a new item with status 201", async () => {
-          
-          const newItem = {
-            name : "Salad",
-            description : "With anchovies and olives",
-            price : 10,
-            category : "Vegetarian",
-            image : "https://example.com/salad.jpg",
-            restaurant : "123456789",
-            available : true,
-          };
-
-          const mockItem = {
-            name : newItem.name,
-            description : newItem.description,
-            price : newItem.price,
-            category : newItem.category,
-            image : newItem.image,
-            restaurant : newItem.restaurant,
-            available : newItem.available,
-          };
-
-          Item.prototype.save.mockResolvedValue(mockItem); // Mocking .save()
-
-          const res = await request(app).post("/createItem").send(newItem);
-          expect(res.status).toBe(201);
-          expect(res.body.item).toEqual(mockItem);
-      });
+    it("should create a new item with status 201", async () => {
+      Item.prototype.save.mockResolvedValue(mockItems[0]); // Mocking .save()
+      const res = await request(app).post("/createItem").send(mockItems[0]);
+      expect(res.status).toBe(201);
+      expect(res.body.message).toBe("Item created successfully");
+    });
 
     it("should return 500 if an error occurs", async () => {
       Item.prototype.save.mockRejectedValue(new Error("Error creating item"));
