@@ -88,4 +88,3 @@ const validateRestaurant = (data) => {
   };
   
   module.exports = { validateRestaurant, validateFileSize };
-  
