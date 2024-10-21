@@ -170,5 +170,33 @@ const confirmDelivery = async (req, res) => {
         .json({ message: "Internal Server Error: " + error.message });
     }
   };
+
+  const getPendingOrders = async (req, res) => {
+    try {
+      const token =
+        req.headers.authorization && req.headers.authorization.split(" ")[1];
+      if (!token) {
+        return res.status(401).json({ message: "Unauthorized: Missing token" });
+      }
   
-module.exports = { purchase, getOrderStatus, confirmDelivery };
+      const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
+      if (!decoded) {
+        return res.status(401).json({ message: "Unauthorized: Invalid token" });
+      }
+  
+      const user = await User.findById(decoded._id);
+      if (!user || !user.roles.some((role) => role.name === "Delivery" || role.name === "Admin")) {
+        return res.status(403).json({ message: "Forbidden: Only Delivery Persons" });
+      }
+  
+      const orders = await Order.find({ status: "Pending" || "Paid" });
+      return res.status(200).json({ orders });
+    } catch (error) {
+      console.error("Error getting pending orders:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal Server Error: " + error.message });
+    }
+  }
+  
+module.exports = { purchase, getOrderStatus, confirmDelivery, getPendingOrders };
