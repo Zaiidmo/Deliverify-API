@@ -26,11 +26,11 @@ router.get("/", getAllRestaurants);
 router.get("/:id", getRestaurantById);
 
 router.put("/:id",
-  //  authMiddleware,
+   authMiddleware,
    updateRestaurant);
 
 router.delete("/:id", 
-  // authMiddleware,
+  authMiddleware,
    deleteRestaurant);
 
 module.exports = router;

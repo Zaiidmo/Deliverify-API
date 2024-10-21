@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const restaurantRoutes = require('./routes/restaurant');
 const verificationRoutes = require('./routes/verifyEmail');
+const statisticsRoutes = require('./routes/statistics');
 
 const app = express();
 const cors = require('cors');
@@ -29,6 +30,7 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/verify', verificationRoutes);
 app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/statistics', statisticsRoutes)
 
 
 // Start the Server
