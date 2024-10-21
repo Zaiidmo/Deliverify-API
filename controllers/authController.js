@@ -6,6 +6,7 @@ const User = require("../models/User");
 const Role = require("../models/Role");
 const { validateRegistration } = require("../validations/authValidations");
 const deviceService = require("../services/deviceService");
+const logService  = require("../services/logService");
 
 // Helper function to find existing user by fields
 const findExistingUser = async (username, email, phoneNumber) => {
@@ -32,8 +33,10 @@ const register = async (req, res) => {
       fullname,
       username,
       email,
+      CIN,
       phoneNumber,
       password,
+      CIN,
       roles: roleNames,
     } = req.body;
 
@@ -75,13 +78,21 @@ const register = async (req, res) => {
       username,
       email,
       phoneNumber,
+      CIN,
       password: hashedPassword,
+      CIN,
       roles: roles.map((role) => role._id),
       isVerified: false,
     });
 
     await newUser.save();
 
+    try {
+      await logService.addLog(newUser._id,"USER_REGISTER",{username : username, fullname : fullname.fname + " " + fullname.lname});
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
+  
     const verificationToken = jwtService.generateVerificationToken(newUser._id);
     console.log("Sending verification email to:", email);
     await mailService.sendVerificationEmail(
@@ -96,13 +107,14 @@ const register = async (req, res) => {
         fullname,
         username,
         email,
+        CIN,
         phoneNumber,
         roles: newUser.roles,
       },
       token: verificationToken,
     });
   } catch (err) {
-    console.error("Error during registration:", err);
+    // console.error("Error during registration:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -177,6 +189,13 @@ const login = async (req, res) => {
           },
           accessToken,
         });
+
+        try {
+          await logService.addLog(user._id,"USER_LOGIN",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+        } catch (logError) {
+          console.error("Error durring add user action to Logs :", logError);
+        }
+
     } else {
       // Generate and send OTP for 2FA
       const otpCode = otpService.generateOTP();
@@ -195,8 +214,8 @@ const login = async (req, res) => {
       });
     }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error." });
+     console.error(err);
+    res.status(500).json({  message: "Server error. " + err.message  });
   }
 };
 
@@ -207,11 +226,11 @@ const verifyOtp = async (req, res) => {
   try {
     const user = await findUserByIdentifier(identifier);
     if (!user) {
-      console.error(`User not found for identifier: ${identifier}`);
+      // console.error(`User not found for identifier: ${identifier}`);
       return res.status(404).json({ message: "User not found." });
     }
     const isOtpValid = otpService.verifyOTP(user.email, otp);
-    console.log(`Is OTP valid: ${isOtpValid}`);
+    // console.log(`Is OTP valid: ${isOtpValid}`);
     if (!isOtpValid) {
       return res.status(401).json({ message: "Invalid or expired OTP." });
     }
@@ -221,7 +240,7 @@ const verifyOtp = async (req, res) => {
 
     // Generate Device Identifier
     const actualDevice = deviceService.getTheDevice(req);
-    console.log(`Device info: ${JSON.stringify(actualDevice)}`);
+    // console.log(`Device info: ${JSON.stringify(actualDevice)}`);
 
     if (rememberDevice) {
       const newDevice = {
@@ -237,7 +256,7 @@ const verifyOtp = async (req, res) => {
       try {
         await user.save();
       } catch (saveError) {
-        console.error("Error saving user:", saveError);
+        // console.error("Error saving user:", saveError);
         return res.status(500).json({ message: "Failed to save user." });
       }
     }
@@ -263,7 +282,7 @@ const verifyOtp = async (req, res) => {
         accessToken,
       });
   } catch (err) {
-    console.error(err);
+    // console.error(err);
     res.status(500).json({ message: "Server error." });
   }
 };
@@ -291,7 +310,7 @@ const logout = async (req, res) => {
     // Return success message
     return res.status(200).json({ message: "Logout successful." });
   } catch (error) {
-    console.error(error);
+    // console.error(error);
 
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "Invalid access token." });
@@ -326,7 +345,7 @@ const requestPasswordReset = async (req, res) => {
       .status(200)
       .json({ message: "Password reset email sent.", token: resetToken });
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -355,7 +374,7 @@ const resetPassword = async (req, res) => {
       .status(200)
       .json({ message: "Password reset successfully.", user: updatedUser });
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
