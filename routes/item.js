@@ -6,10 +6,10 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const { getItems, getItemById, createItem, updateItem, deleteItem, changeTheAvailabality } = require('../controllers/manageItemController');
 
 // get all items
-router.get('/items', getItems);
+router.get('/', getItems);
 
 // get item by id
-router.get('/item/:id', getItemById);
+router.get('/:id', getItemById);
 
 // create item
 router.post('/createItem', authMiddleware, createItem);
