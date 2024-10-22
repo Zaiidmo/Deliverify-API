@@ -5,6 +5,6 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { search } = require("../controllers/searchController");
 
 // Search route
-router.get("/search", search);
+router.get("/", search);
 
 module.exports = router;
