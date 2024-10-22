@@ -33,7 +33,6 @@ const register = async (req, res) => {
       fullname,
       username,
       email,
-      CIN,
       phoneNumber,
       password,
       CIN,
