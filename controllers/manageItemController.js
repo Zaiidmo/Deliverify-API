@@ -39,6 +39,9 @@ const getItemsByRestaurant = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
 const createItem = async (req, res) => {
   const { name, description, price, category, image, restaurant, available } =
     req.body;

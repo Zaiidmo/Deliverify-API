@@ -1,8 +1,9 @@
 const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { createRestaurant, getAllRestaurants, getRestaurantById, updateRestaurant, deleteRestaurant} = require("../controllers/restaurantController");
+const { createRestaurant, getAllRestaurants, getRestaurantById,createRestaurantWithItems, getAllStatisticsResto, updateRestaurant, deleteRestaurant} = require("../controllers/restaurantController");
 const { validateRestaurant, validateFileSize } = require("../validations/restaurantValidation");
 const upload = require("../config/multer");
+const { isAdmin } = require("../middlewares/adminMiddleware");
 
 
 
@@ -24,6 +25,11 @@ const validateRestaurantMiddleware = (req, res, next) => {
 
 router.get("/", getAllRestaurants);
 router.get("/:id", getRestaurantById);
+
+router.post('/create-restaurant-with-items', authMiddleware, isAdmin, createRestaurantWithItems);
+
+router.post("/statisticsResto", authMiddleware, getAllStatisticsResto);
+
 
 router.put("/:id",
    authMiddleware,

@@ -1,6 +1,9 @@
 const restaurantService = require("../services/restaurantService");
 const User = require("../models/User")
 const jwtService = require("../services/jwtService")
+const Item = require("../models/Item")
+const statisticManager = require("../services/statisticManagerService");
+
 
 const createRestaurant = async (req, res) => {
   console.log("Received request to create restaurant:", req.body);
@@ -31,7 +34,34 @@ const createRestaurant = async (req, res) => {
   } catch (error) {
     console.error("Erreur lors de la création du restaurant :", error.message);
 
-    res.status(500).json({ message: error.message || "Erreur serveur" });
+    res.status(500).json({message: "Erreur serveur"} );
+  }
+};
+
+const createRestaurantWithItems = async (req, res) => {
+  try {
+    // Extract restaurant details and items from the request body
+    const { items, ...restaurantData } = req.body;
+
+    // Create and save the restaurant
+    const restaurant = await restaurantService.createRestaurant(restaurantData)
+    // Create and save each item linked to the newly created restaurant
+    for (let i = 0; i < items.length; i++) {
+      const item = new Item({
+        ...items[i],
+        restaurant: restaurant._id,
+      });
+      await item.save();
+    }
+
+    // Return a success response
+    res.status(201).json({
+      message: "Restaurant and items created successfully",
+      restaurant,
+    });
+  } catch (error) {
+    // Handle errors and return an error response
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -89,10 +119,28 @@ const deleteRestaurant = async (req, res) => {
       });
   }
 };
+
+const getAllStatisticsResto = async (req, res) => {
+  try{
+      const ownerId = req.user._id;
+      const stats = await statisticManager.getStatisticByOwner(ownerId);
+      return res.status(200).json({
+          success: true,
+          data: stats,
+      });
+  } catch (error) {
+      return res.status(500).json({
+          success: false,
+          message: error.message,
+      });
+  }
+  };
 module.exports = {
   createRestaurant,
   getAllRestaurants,
   getRestaurantById,
   updateRestaurant,
   deleteRestaurant,
+  createRestaurantWithItems,
+  getAllStatisticsResto,
 };

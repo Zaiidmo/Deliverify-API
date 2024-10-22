@@ -47,19 +47,10 @@ const restaurant = await Restaurant.findById({_id: id, isDeleted: false});
 if(!restaurant){
   throw new Error ('Restaurant non trouvé');
 }
+
 return{
-  _id: restaurant._id,
-  name: restaurant.name,
-  address: restaurant.address,
-  phoneNumber: restaurant.phoneNumber,
-  logo: restaurant.logo || 'default-restaurant.jpg', 
-  cover: restaurant.cover || 'default-restaurant-cover.jpg',
-  images: restaurant.images || [], 
-  category: restaurant.category,
-  openAt: restaurant.openAt,
-  closeAt: restaurant.closeAt,
-  owner: restaurant.owner
-};
+  "restaurant": restaurant, 
+}
   }catch (error){
     throw new Error (error.message);
   }

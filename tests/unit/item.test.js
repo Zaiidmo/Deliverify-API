@@ -138,33 +138,6 @@ describe("Manage Item Controller (without database)", () => {
     });
   });
 
-  // Test PUT /changeTheAvailabality/:id
-  describe("PUT /changeTheAvailabality/:id", () => {
-    it("should toggle the availability of an item with status 200", async () => {
-      const mockItem = { _id: "1", name: "Pizza", available: true };
-      Item.findById.mockResolvedValue(mockItem); // Mock findById
-      Item.prototype.save.mockResolvedValue({ ...mockItem, available: false }); // Mock save()
-
-      const res = await request(app).put("/changeTheAvailabality/1");
-      expect(res.status).toBe(200);
-      expect(res.body.item.available).toBe(false);
-    });
-
-    it("should return 404 if item not found", async () => {
-      Item.findById.mockResolvedValue(null); // Simulate not found
-      const res = await request(app).put("/changeTheAvailabality/999");
-      expect(res.status).toBe(404);
-      expect(res.body.message).toBe("Item not found");
-    });
-
-    it("should return 500 if an error occurs", async () => {
-      Item.findById.mockRejectedValue(new Error("Error changing availability"));
-      const res = await request(app).put("/changeTheAvailabality/1");
-      expect(res.status).toBe(500);
-      expect(res.body.message).toBe("Error changing availability");
-    });
-  });
-
   // Test DELETE /deleteItem/:id
   describe("DELETE /deleteItem/:id", () => {
     it("should delete an item with status 200", async () => {
@@ -188,6 +161,44 @@ describe("Manage Item Controller (without database)", () => {
       const res = await request(app).delete("/deleteItem/1");
       expect(res.status).toBe(500);
       expect(res.body.message).toBe("Error deleting item");
+    });
+  });
+
+  // Test PUT /changeTheAvailabality/:id
+  describe("PUT /changeTheAvailabality/:id", () => {
+    it("should update the availability of an item with status 200", async () => {
+      const mockItem = {
+        _id: "1",
+        available: true,
+        save: jest.fn().mockResolvedValue(true), // Mock the save method
+      };
+      Item.findById.mockResolvedValue(mockItem); // Mock findById
+
+      const res = await request(app).put("/changeTheAvailabality/1");
+
+      expect(Item.findById).toHaveBeenCalledWith("1");
+      expect(mockItem.save).toHaveBeenCalled();
+      expect(mockItem.available).toBe(false); // The availability should toggle
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe("Item availability updated successfully");
+    });
+
+    it("should return 404 if item is not found", async () => {
+      Item.findById.mockResolvedValue(null); // Simulate item not found
+
+      const res = await request(app).put("/changeTheAvailabality/999");
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toBe("Item not found");
+    });
+
+    it("should return 500 if an error occurs", async () => {
+      Item.findById.mockRejectedValue(new Error("Database error")); // Simulate a database error
+
+      const res = await request(app).put("/changeTheAvailabality/1");
+
+      expect(res.status).toBe(500);
+      expect(res.body.message).toBe("Database error");
     });
   });
 });

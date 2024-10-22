@@ -1,4 +1,4 @@
-const { getAllStatisticsResto } = require("../../controllers/statisticsManagerController");
+const { getAllStatisticsResto } = require("../../controllers/restaurantController");
 const statisticManagerService = require("../../services/statisticManagerService");
 
 jest.mock("../../services/statisticManagerService");

@@ -7,25 +7,26 @@ const {
   createUser,
   updateUser,
   banUser,
+  switchRoleToDelivery
 } = require("../controllers/userController");
-const { switchRoleToDelivery } = require("../controllers/switchRoleController");
+const { isAdmin } = require("../middlewares/adminMiddleware");
 
 // get all users
-router.get("/users", getAllUsers);
+router.get("/users", isAdmin, getAllUsers);
 
 // get user
 router.get("/user/:id", getUserById);
 
 // create user
-router.post("/createUser", authMiddleware, createUser);
+router.post("/createUser", authMiddleware, isAdmin, createUser);
 
 // update user
-router.put("/UpdateUser/:id", authMiddleware, updateUser);
+router.put("/UpdateUser/:id", authMiddleware, isAdmin, updateUser);
 
 // banne the user
-router.put("/banneUser/:id", authMiddleware, banUser);
+router.put("/banneUser/:id", authMiddleware,isAdmin, banUser);
 
 // switch role
-router.post("/switchRole/:id", authMiddleware, switchRoleToDelivery);
+router.post("/switchRole/:id", authMiddleware,isAdmin, switchRoleToDelivery);
 
 module.exports = router;
