@@ -179,7 +179,8 @@ describe("banne the user", () => {
         User.findByIdAndUpdate.mockResolvedValue(mockUser);
         await banUser(req, res);
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith(mockUser);
+        // expect(res.message).toEqual("User banned");
+        expect(res.json).toHaveBeenCalledWith({message: "User banned", "User": mockUser});
     });
 
     it("should handle server error and return 500", async () => {
