@@ -63,7 +63,7 @@ const updateRestaurantById = async (id , updateData) => {
     restaurant.phoneNumber = updateData.phoneNumber ?? restaurant.phoneNumber;
     restaurant.logo = updateData.logo ?? restaurant.logo;
     restaurant.cover= updateData.cover ?? restaurant.cover;
-    restaurant.images = updateData.images.length > 0 ? updateData.images : restaurant.images;
+    restaurant.images = updateData.images ? updateData.images : restaurant.images;
     restaurant.openAt = updateData.openAt ?? restaurant.openAt;
     restaurant.closeAt = updateData.closeAt ?? restaurant.closeAt;
     restaurant.category = updateData.category ?? restaurant.category;

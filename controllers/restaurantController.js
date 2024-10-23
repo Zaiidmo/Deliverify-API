@@ -87,9 +87,14 @@ const getRestaurantById = async (req, res) => {
 
 const updateRestaurant = async (req, res) => {
   try {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
+    if (!decoded) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    }
     const { id } = req.params;
     const updateData = req.body;
-
+    
     const updatedRestaurant = await restaurantService.updateRestaurantById(
       id,
       updateData
