@@ -30,7 +30,7 @@ try{
             },
         },
     ]);
-    const restaurantStats = await Promise.all(restaurants.map(async (restaurant) => {
+    const restaurantStats = await Promise.all(restaurant.map(async (restaurant) => {
         const restaurantId = restaurant._id;
   
         const cancelledOrders = orderStats.find(
