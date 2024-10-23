@@ -31,12 +31,7 @@ const createRestaurant= async (restaurantData) => {
 
 const getAllRestaurants = async() => {
   const restaurants = await Restaurant.find({isDeleted: false, isApprouved: true});
-  return restaurants.map(restaurant => ({
-    ...restaurant,
-    logo: restaurant.logo || 'default-restaurant.jpg', 
-    cover: restaurant.cover || 'default-restaurant-cover.jpg',
-    images: restaurant.images.length > 0 ? restaurant.images : [] 
-  }));
+  return restaurants;
 };
 
 const getRestaurantById = async(id) =>{
@@ -96,10 +91,26 @@ const softDeleteRestaurant = async (id) =>{
     throw new Error(error.message)
   }
 }
+
+const acceptRestaurant = async (id) => {
+  try{
+    const restaurant = await Restaurant.findById(id);
+    if(!restaurant){
+      throw new Error('Restaurant non trouvé');
+    }
+
+    restaurant.isApprouved = true;
+    await restaurant.save();
+    return restaurant;
+  }catch (error){
+    throw new Error(error.message)
+  }
+}
 module.exports = {
   createRestaurant,
   getAllRestaurants,
   getRestaurantById,
   updateRestaurantById,
   softDeleteRestaurant,
+  acceptRestaurant,
 };

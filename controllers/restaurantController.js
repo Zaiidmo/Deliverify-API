@@ -135,6 +135,25 @@ const getAllStatisticsResto = async (req, res) => {
       });
   }
   };
+const acceptRestaurant = async (req, res) => {
+  try {
+    const restaurantId = req.body.restaurantId;
+    const restaurant = await restaurantService.acceptRestaurant(restaurantId);
+    res
+      .status(200)
+      .json({
+        message: "Restaurant accepté avec succès",
+        restaurant,
+      });
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        message:
+          error.message || "erreur lors de l'acceptation du restaurant ",
+      });
+  }
+};
 module.exports = {
   createRestaurant,
   getAllRestaurants,
@@ -143,4 +162,5 @@ module.exports = {
   deleteRestaurant,
   createRestaurantWithItems,
   getAllStatisticsResto,
+  acceptRestaurant
 };
