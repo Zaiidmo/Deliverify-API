@@ -12,7 +12,7 @@ const {
 const { isAdmin } = require("../middlewares/adminMiddleware");
 
 // get all users
-router.get("/users", isAdmin, getAllUsers);
+router.get("/", isAdmin, getAllUsers);
 
 // get user
 router.get("/user/:id", getUserById);

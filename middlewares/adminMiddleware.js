@@ -1,15 +1,16 @@
 const User = require('../models/User'); 
+const jwtService = require('../services/jwtService')
 
 const isAdmin = async (req, res, next) => {
     try {
-        const user = req.user;
-
-        if (!user) {
-            return res.status(401).json({ message: 'Unauthorized: No user found' });
+        const token = req.headers.authorization?.split(" ")[1];
+        const decoded = jwtService.verifyToken(token)
+        if(!decoded){
+            return res.status(401).json({message: 'Unauthorized: No Token Provided'})
         }
 
         // Fetch user from the database to ensure we have the latest roles
-        const foundUser = await User.findById(user._id).populate('roles');
+        const foundUser = await User.findById(decoded._id).populate('roles');
         if (!foundUser) {
             return res.status(404).json({ message: 'User not found' });
         }

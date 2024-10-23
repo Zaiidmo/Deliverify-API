@@ -43,7 +43,7 @@ app.use('/api/order', orderRoutes(socketService.io));
 app.use('/api/webhooks', webHooksRoutes);
 app.use('/api/roles', roleRoutes);
 app.use("/api/item", itemRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/search", searchRoutes);
 
 // Initialize Socket.IO server
