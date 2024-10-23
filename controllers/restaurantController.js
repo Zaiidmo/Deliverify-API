@@ -58,6 +58,7 @@ const createRestaurantWithItems = async (req, res) => {
     res.status(201).json({
       message: "Restaurant and items created successfully",
       restaurant,
+      items,
     });
   } catch (error) {
     // Handle errors and return an error response
