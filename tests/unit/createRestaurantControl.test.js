@@ -154,6 +154,7 @@ describe('Restaurant Controller - createRestaurantWithItems', () => {
       expect(res.json).toHaveBeenCalledWith({
         message: "Restaurant and items created successfully",
         restaurant: mockRestaurant,
+        items: req.body.items,
       });
     });
 

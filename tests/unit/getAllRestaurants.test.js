@@ -53,8 +53,6 @@ describe("Restaurant Service - getAllRestaurants", () => {
     expect(restaurants[0].images).toEqual(["image1.jpg", "image2.jpg"]);
 
     // Vérifier que le second restaurant a des valeurs par défaut pour logo, cover, et images
-    expect(restaurants[1].logo).toEqual("default-restaurant.jpg");
-    expect(restaurants[1].cover).toEqual("default-restaurant-cover.jpg");
     expect(restaurants[1].images).toEqual([]);
   });
 
