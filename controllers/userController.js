@@ -114,7 +114,7 @@ const updateUser = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json(updatedUser);
+    res.status(200).json({"Updated fields": req.body, "User": updatedUser});
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

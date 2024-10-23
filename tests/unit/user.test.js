@@ -140,7 +140,7 @@ describe("updateUser", () => {
         User.findByIdAndUpdate.mockResolvedValue(mockUser);
         await updateUser(req, res);
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith(mockUser);
+        expect(res.json).toHaveBeenCalledWith({"Updated fields": req.body, "User": mockUser});
     });
 
     it("should handle server error and return 500", async () => {
