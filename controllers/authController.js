@@ -259,6 +259,12 @@ const verifyOtp = async (req, res) => {
         return res.status(500).json({ message: "Failed to save user." });
       }
     }
+
+    try {
+      await logService.addLog(user._id,"USER_VERIFY_OTP",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
     res
       .status(200)
       .cookie("refreshToken", refreshToken, {
@@ -298,6 +304,8 @@ const logout = async (req, res) => {
     if (!decoded) {
       return res.status(401).json({ message: "Unauthorized! Invalid token." });
     }
+    const user = User.findById(decoded._id);
+    
     // Clear the refresh token cookie
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -307,6 +315,11 @@ const logout = async (req, res) => {
     });
 
     // Return success message
+    try {
+      await logService.addLog(user._id,"USER_LOGOUT",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
     return res.status(200).json({ message: "Logout successful." });
   } catch (error) {
     // console.error(error);
@@ -339,6 +352,11 @@ const requestPasswordReset = async (req, res) => {
       email,
       resetToken
     );
+    try {
+      await logService.addLog(user._id,"USER_REQUEST_RESET",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
 
     return res
       .status(200)
@@ -369,6 +387,13 @@ const resetPassword = async (req, res) => {
       newPassword
     );
 
+    const user = await User.findById(userId);
+
+    try {
+      await logService.addLog(userId,"USER_RESETED_PASSWORD",{user : userId,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
     return res
       .status(200)
       .json({ message: "Password reset successfully.", user: updatedUser });
