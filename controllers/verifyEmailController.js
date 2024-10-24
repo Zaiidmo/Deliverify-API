@@ -8,10 +8,10 @@ const verifyEmail = async (req, res) => {
   try {
     // Verify the token and extract the user ID
     const decoded = jwtService.verifyToken(token);
-    console.log("Decoded token:", decoded); // Log the decoded token
+    // console.log("Decoded token:", decoded); // Log the decoded token
 
     if (!decoded || !decoded._id || typeof decoded._id !== "string") {
-      console.log("Token is invalid or expired:", decoded); 
+      // console.log("Token is invalid or expired:", decoded); 
       return res
         .status(400)
         .json({ message: "Invalid or expired verification link." });
@@ -21,20 +21,20 @@ const verifyEmail = async (req, res) => {
 
     // Check if the user ID is valid
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      console.log("Invalid user ID:", userId);
+      // console.log("Invalid user ID:", userId);
       return res.status(400).json({ message: "User not found." });
     }
 
     // Find the user in the database
     const user = await User.findById(userId);
     if (!user) {
-      console.log("No user found with ID:", userId);
+      // console.log("No user found with ID:", userId);
       return res.status(400).json({ message: "User not found." });
     }
 
     // Check if the user is already verified
     if (user.isVerified) {
-      console.log("User is already verified:", userId);
+      // console.log("User is already verified:", userId);
       return res.status(400).json({ message: "User already verified." });
     }
 
@@ -50,7 +50,7 @@ const verifyEmail = async (req, res) => {
       user,
     });
   } catch (error) {
-    console.error("Verification error:", error);
+    // console.error("Verification error:", error);
     res
       .status(500)
       .json({ message: "An error occurred while verifying email." });
@@ -71,7 +71,7 @@ const checkToken = async (req, res) => {
       userId: decoded._id,
     });
   } catch (error) {
-    console.error("Token check error:", error);
+    // console.error("Token check error:", error);
     res
       .status(500)
       .json({ message: "An error occurred while checking the token." });

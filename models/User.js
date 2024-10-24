@@ -95,7 +95,7 @@ const userSchema = new mongoose.Schema({
       deviceName: {
         type: String,
         trim: true,
-        default: "Unknown Device", 
+        default: "Unknown Device",
       },
       addedAt: {
         type: Date,
@@ -104,8 +104,11 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
+  isBanned: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-// Export the User model without passwordService
 const User = mongoose.model('User', userSchema);
 module.exports = User;

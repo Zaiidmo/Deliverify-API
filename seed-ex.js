@@ -28,10 +28,7 @@ const seedDatabase = async () => {
     { name: "DELETE_RESTAURANT", description: "Delete an existing restaurant" },
     { name: "CREATE_REVIEW", description: "Create a new review" },
     { name: "UPDATE_REVIEW", description: "Update an existing review" },
-    {
-      name: "DELETE_REVIEW",
-      dAlloMediaescription: "Delete an existing review",
-    },
+    { name: "DELETE_REVIEW", description: "Delete an existing review" },
     { name: "CREATE_LIKE", description: "Create a new like" },
     { name: "DELETE_LIKE", description: "Delete an existing like" },
     { name: "CREATE_FAVORITE", description: "Create a new favorite" },
@@ -120,24 +117,40 @@ const seedDatabase = async () => {
       roles: [initialRoles[3]._id],
       isVerified: true,
     },
+    {
+      fullname: { fname: "Client 2", lname: "Test" },
+      username: "Client2",
+      email: "client2@email.com",
+      phoneNumber: "0987654321",
+      password: "password",
+      CIN: "CC654321",
+      roles: [initialRoles[1]._id],
+      isVerified: true,
+    },
+    {
+      fullname: { fname: "Manager 2", lname: "Test" },
+      username: "Manager2",
+      email: "manager2@email.com",
+      phoneNumber: "1122334455",
+      password: "password",
+      CIN: "MM654321",
+      roles: [initialRoles[2]._id],
+      isVerified: true,
+    },
   ];
 
   // Create users
   const initialUsers = await User.insertMany(users);
-  //   console.log("Users created: ", initialUsers);
+  console.log("Users created: ", initialUsers);
+
+  // Create restaurants
   const initialRestaurants = await Restaurant.insertMany([
     {
       name: "Restaurant 1",
       address: "Address 1",
       phoneNumber: "1122334455",
-      logo: "path/to/logo1.jpg", // Chemin vers le logo
-      cover: "path/to/cover1.jpg", // Chemin vers la couverture
-      images: [
-        "path/to/image1.jpg",
-        "path/to/image2.jpg",
-        "path/to/image3.jpg",
-        "path/to/image4.jpg",
-      ], // Liste des images
+      website: "",
+      description: "Description 1",
       owner: initialUsers[2]._id,
       openAt: "08:00",
       closeAt: "22:00",
@@ -145,60 +158,26 @@ const seedDatabase = async () => {
         name: "Fast Food",
         description: "Fast Food",
       },
-      location: {
-        type: "Point",
-        coordinates: [40.712776, -74.005974], // Exemple de coordonnées
-      },
     },
     {
       name: "Restaurant 2",
       address: "Address 2",
       phoneNumber: "2233445566",
-      logo: "path/to/logo2.jpg",
-      cover: "path/to/cover2.jpg",
-      images: [
-        "path/to/image5.jpg",
-        "path/to/image6.jpg",
-        "path/to/image7.jpg",
-        "path/to/image8.jpg",
-      ],
-      owner: initialUsers[1]._id,
+      website: "http://restaurant2.com",
+      description: "Description 2",
+      owner: initialUsers[2]._id,
       openAt: "10:00",
       closeAt: "23:00",
       category: {
         name: "Italian",
         description: "Italian Cuisine",
       },
-      location: {
-        type: "Point",
-        coordinates: [34.052235, -118.243683],
-      },
-    },
-    {
-      name: "Restaurant 3",
-      address: "Address 3",
-      phoneNumber: "3344556677",
-      logo: "path/to/logo3.jpg",
-      cover: "path/to/cover3.jpg",
-      images: [
-        "path/to/image9.jpg",
-        "path/to/image10.jpg",
-      ],
-      owner: initialUsers[0]._id,
-      openAt: "09:00",
-      closeAt: "21:00",
-      category: {
-        name: "Chinese",
-        description: "Chinese Cuisine",
-      },
-      location: {
-        type: "Point",
-        coordinates: [51.507351, -0.127758],
-      },
     },
   ]);
+  console.log("Restaurants created: ", initialRestaurants);
 
-  const initialItem = await Item.insertMany([
+  // Create items
+  const initialItems = await Item.insertMany([
     {
       name: "Item 1",
       description: "Description 1",
@@ -206,21 +185,51 @@ const seedDatabase = async () => {
       restaurant: initialRestaurants[0]._id,
       category: "Category 1",
     },
-  ]);
-
-  const initialOrder = await Order.insertMany([
     {
-      user: initialUsers[1]._id,
-      items: [
-        {
-          item: initialItem[0]._id,
-          quantity: 2,
-        },
-      ],
-      Delivery: initialUsers[3]._id,
-      totalAmount: 20,
+      name: "Item 2",
+      description: "Description 2",
+      price: 15,
+      restaurant: initialRestaurants[1]._id,
+      category: "Category 2",
     },
   ]);
+  console.log("Items created: ", initialItems);
+
+  // Create orders
+  const seedOrders = async () => {
+    const orders = [
+      {
+        user: initialUsers[1]._id, // Replace with a valid user ID
+        items: [
+          {
+            item: initialItems[0]._id, // Replace with a valid item ID
+            quantity: 2,
+          },
+          {
+            item: initialItems[1]._id, // Replace with a valid item ID
+            quantity: 1,
+          },
+        ],
+        delivery: initialUsers[3]._id, // Replace with a valid user ID if necessary
+        status: "Pending",
+        totalAmount: 100.0,
+        paymentId: "payment12345", // Provide a valid payment ID
+        isDelivered: false,
+      },
+      // Add more orders as needed
+    ];
+
+    try {
+      await Order.insertMany(orders);
+      console.log("Orders seeded successfully!");
+    } catch (error) {
+      console.error("Error seeding the orders: ", error);
+    }
+  };
+
+  // Call the seed function and wait for it to complete
+  await seedOrders();
+
   // Close the connection
   process.exit(0);
 };
