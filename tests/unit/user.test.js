@@ -8,6 +8,7 @@ const {
 } = require("../../controllers/userController");
 const User = require("../../models/User");
 const Role = require("../../models/Role")
+const jwtService = require("../../services/jwtService");
 
 // Mock dependencies
 jest.mock("../../models/User");
@@ -212,8 +213,8 @@ describe("banne the user", () => {
 
   beforeEach(() => {
     req = {
-      params: {
-        id: "someUserId", 
+      headers: {
+        authorization: "Bearer validToken", // Simulated valid token
       },
     };
     res = {
@@ -227,6 +228,10 @@ describe("banne the user", () => {
   });
 
   it("should switch the user role to Delivery", async () => {
+    // Mock the decoded token and JWT verification
+    const decodedToken = { _id: "someUserId" };
+    jwtService.verifyToken.mockReturnValue(decodedToken);
+
     // Mock the delivery role response
     const deliveryRole = { _id: "deliveryRoleId", name: "Delivery" };
     Role.findOne.mockResolvedValue(deliveryRole);
@@ -241,6 +246,7 @@ describe("banne the user", () => {
 
     await switchRoleToDelivery(req, res);
 
+    expect(jwtService.verifyToken).toHaveBeenCalledWith("validToken");
     expect(user.roles).toEqual([deliveryRole._id]); // Expect the roles to include deliveryRoleId
     expect(user.save).toHaveBeenCalled(); // Ensure save was called
     expect(res.status).toHaveBeenCalledWith(200); // Check response status
@@ -250,7 +256,32 @@ describe("banne the user", () => {
     }); // Check response body
   });
 
+  it("should return 401 if no token is provided", async () => {
+    req.headers.authorization = undefined; // Simulate missing token
+
+    await switchRoleToDelivery(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(401); // Expect 401 response
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Unauthorized: No Token Provided",
+    }); // Expect appropriate message
+  });
+
+  it("should return 401 if token verification fails", async () => {
+    jwtService.verifyToken.mockReturnValue(null); // Simulate invalid token
+
+    await switchRoleToDelivery(req, res);
+
+    expect(jwtService.verifyToken).toHaveBeenCalledWith("validToken");
+    expect(res.status).toHaveBeenCalledWith(401); // Expect 401 response
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Unauthorized: No Token Provided",
+    }); // Expect appropriate message
+  });
+
   it("should return 404 if user is not found", async () => {
+    // Mock token verification
+    jwtService.verifyToken.mockReturnValue({ _id: "someUserId" });
     // Mock the role and user responses
     Role.findOne.mockResolvedValue({ _id: "deliveryRoleId", name: "Delivery" });
     User.findById.mockResolvedValue(null); // Simulate user not found
@@ -262,6 +293,8 @@ describe("banne the user", () => {
   });
 
   it("should return 500 if there is a server error", async () => {
+    // Mock token verification
+    jwtService.verifyToken.mockReturnValue({ _id: "someUserId" });
     // Mock the role response
     Role.findOne.mockResolvedValue({ _id: "deliveryRoleId", name: "Delivery" });
     User.findById.mockRejectedValue(new Error("Database error")); // Simulate a database error
@@ -272,5 +305,3 @@ describe("banne the user", () => {
     expect(res.json).toHaveBeenCalledWith({ message: "Server error" }); // Expect appropriate message
   });
 });
-
-

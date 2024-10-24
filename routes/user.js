@@ -27,6 +27,6 @@ router.put("/UpdateUser/:id", authMiddleware, isAdmin, updateUser);
 router.put("/banneUser/:id", authMiddleware,isAdmin, banUser);
 
 // switch role
-router.post("/switchRole/:id", authMiddleware,isAdmin, switchRoleToDelivery);
+router.post("/switchRole", authMiddleware, switchRoleToDelivery);
 
 module.exports = router;

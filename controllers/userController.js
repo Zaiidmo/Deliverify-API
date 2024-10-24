@@ -2,6 +2,8 @@ const User = require("../models/User");
 const Role = require("../models/Role");
 const passwordService = require("../services/passwordService")
 const { validateRegistration } = require("../validations/authValidations");
+const jwtService = require("../services/jwtService");
+
 
 // get all users
 const getAllUsers = async (req, res) => {
@@ -143,19 +145,30 @@ const banUser = async (req, res) => {
 }
 
 const switchRoleToDelivery = async (req, res) => {
-  const { id } = req.params; 
-  const deliveryRole = await Role.findOne({ name: "Delivery" });
-
+  
   try {
+    const deliveryRole = await Role.findOne({ name: "Delivery" });
+    const token = req.headers.authorization?.split(" ")[1];
+    if(!token){
+      return res.status(401).json({message: 'Unauthorized: No Token Provided'})
+    }
+    const decoded = jwtService.verifyToken(token)
+    if(!decoded){
+      return res.status(401).json({message: 'Unauthorized: No Token Provided'})
+    }
     // Find the user by ID
-    const user = await User.findById(id);
+    const user = await User.findById(decoded._id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    const roleId = deliveryRole._id;
+    // console.log(roleId);
+    
+
     // Switch the user's role to Delivery
-    user.roles = [deliveryRole._id]; 
+    user.roles.push(roleId);
     await user.save(); 
 
     return res.status(200).json({ message: "Role switched to Delivery", user });
