@@ -3,6 +3,7 @@ const User = require("../models/User")
 const jwtService = require("../services/jwtService")
 const Item = require("../models/Item")
 const statisticManager = require("../services/statisticManagerService");
+const logService  = require("../services/logService");
 
 
 const createRestaurant = async (req, res) => {
@@ -26,6 +27,13 @@ const createRestaurant = async (req, res) => {
     const newRestaurant = await restaurantService.createRestaurant(
       restaurantData
     );
+
+    try {
+      await logService.addLog( user._id ,"CREATE_RESTAURANT",{restaurant : newRestaurant.name ,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+    } catch (logError) {
+      console.error(" Error durring add user action to Logs :", logError);
+    }
+    
 
     res.status(201).json({
       message: "Restaurant créé avec succès",

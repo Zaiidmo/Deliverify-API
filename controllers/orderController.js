@@ -5,6 +5,7 @@ const socketService = require("../services/socketService");
 const User = require("../models/User");
 const Order = require("../models/Order");
 const Item = require("../models/Item");
+const logService  = require("../services/logService");
 
 const purchase = async (req, res, io) => {
   try {
@@ -159,6 +160,13 @@ const confirmDelivery = async (req, res) => {
       // Update the order's delivery confirmation status
       order.status = "Delivered";
       await order.save();
+      
+      try {
+        const user = await User.findById(req.user._id);
+        await logService.addLog( user._id ,"CONFIRM_DELIVERY",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+      } catch (logError) {
+        console.error(" Error durring add user action to Logs :", logError);
+      }
   
       return res
         .status(200)
