@@ -1,6 +1,8 @@
 const Role = require('../models/Role');
 const Permission = require('../models/Permission');
 const User = require('../models/User');
+const logService = require('../services/logService');
+
 
 // Create a new role
 const createRole = async (req, res) => {
@@ -8,6 +10,15 @@ const createRole = async (req, res) => {
         const { roleName } = req.body;
 
         const role = await Role.create({ name: roleName });
+        
+        try {
+            const user = await User.findById(req.user._id);
+            await logService.addLog( user._id ,"CREATE_ROLE",{role : role.name ,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+          } catch (logError) {
+            console.error(" Error durring add user action to Logs :", logError);
+          }
+
+
         return res.status(201).json({ message: 'Role created', role });
     } catch (error) {
         return res.status(500).json({ message: 'Server error', error: error.message });
