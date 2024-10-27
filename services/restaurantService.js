@@ -121,7 +121,7 @@ const acceptRestaurant = async (id) => {
 };
 
 const getAdminRestaurants = async () => {
-  const restaurants = await Restaurant.find({ isApprouved: false, isDeleted: false }).select(
+  const restaurants = await Restaurant.find({ isDeleted: false }).select(
     "name owner isApprouved isDeleted "
   );
   for (let i = 0; i < restaurants.length; i++) {
