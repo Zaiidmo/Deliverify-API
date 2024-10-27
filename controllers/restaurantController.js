@@ -85,6 +85,18 @@ const getRestaurantById = async (req, res) => {
   }
 };
 
+const getRestaurants = async (req, res) => {
+  try {
+    const restaurants = await restaurantService.getAdminRestaurants();
+    for(let i = 0; i < restaurants.length; i++){
+      restaurants[i].owner = await User.findById(restaurants[i].owner).select("username email");
+    }
+    return res.status(200).json(restaurants);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 const updateRestaurant = async (req, res) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
@@ -144,6 +156,7 @@ const getAllStatisticsResto = async (req, res) => {
 const acceptRestaurant = async (req, res) => {
   try {
     const restaurantId = req.body.restaurantId;
+    console.log(restaurantId);
     const restaurant = await restaurantService.acceptRestaurant(restaurantId);
     res
       .status(200)
@@ -168,5 +181,6 @@ module.exports = {
   deleteRestaurant,
   createRestaurantWithItems,
   getAllStatisticsResto,
-  acceptRestaurant
+  acceptRestaurant,
+  getRestaurants
 };
