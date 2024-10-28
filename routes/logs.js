@@ -1,4 +1,3 @@
-//routes/logs.js
 /**
  * Logs Route Module
  * 
@@ -11,6 +10,7 @@
  * **Endpoints:**
  * 1. `POST /logs/users`: Fetch all logs with filters (admin-only)
  * 2. `POST /logs/mylogs`: Fetch only logs with filters of authenticated user
+ *
  * 
  * **Middlewares Used:**
  * - `authMiddleware`: Ensures the user is authenticated.

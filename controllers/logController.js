@@ -27,33 +27,29 @@ const logController = {
    */
   async getLogs(req, res) {
     try {
-      // Get parameters from the request body
       const { user, action, sort, limit, page } = req.body;
 
-      // Build filters from request body
       const filters = {};
       if (user) filters.user = user;
       if (action) filters.action = action;
 
-      // Sort order (default: by timestamp descending)
       const sortOrder = sort ? sort : { timestamp: -1 };
-
-      // Pagination settings (defaults: 50 items per page, page 1)
-      const logsLimit = limit ? parseInt(limit, 10) : 50;
+      const logsLimit = limit ? parseInt(limit, 10) : 10;
       const logsPage = page ? parseInt(page, 10) : 1;
       const skip = (logsPage - 1) * logsLimit;
 
-      // Fetch logs from the service
-      const logs = await logService.getLogs(filters, sortOrder, logsLimit, skip);
+      // Fetch logs and total count from the service
+      const { logs, total } = await logService.getLogs(filters, sortOrder, logsLimit, skip);
 
-      // Return the logs to the admin
       return res.status(200).json({
         success: true,
         data: logs,
         message: 'Logs fetched successfully',
         pagination: {
           page: logsPage,
-          limit: logsLimit
+          limit: logsLimit,
+          total: total, // Include total count for pagination
+          totalPages: Math.ceil(total / logsLimit) // Calculate total pages
         }
       });
     } catch (error) {
@@ -96,24 +92,18 @@ const logController = {
    */
   async getUserLogs(req, res) {
     try {
-      // Retrieve the authenticated user's ID from `req.user`
       const userId = req.user._id;
-
-      // Build filters based on the authenticated user and request body
       const { action, sort, limit, page } = req.body;
-      const filters = { user: userId }; // Filter by the authenticated user
-      if (action) filters.action = action; // Filter by action if provided
+      const filters = { user: userId };
+      if (action) filters.action = action;
 
-      // Sort order (default: by timestamp descending)
       const sortOrder = sort ? sort : { timestamp: -1 };
-
-      // Pagination settings (defaults: 50 items per page, page 1)
-      const logsLimit = limit ? parseInt(limit, 10) : 50;
+      const logsLimit = limit ? parseInt(limit, 10) : 10;
       const logsPage = page ? parseInt(page, 10) : 1;
       const skip = (logsPage - 1) * logsLimit;
 
-      // Fetch user-specific logs from the service
-      const logs = await logService.getLogs(filters, sortOrder, logsLimit, skip);
+      // Fetch user-specific logs and total count from the service
+      const { logs, total } = await logService.getLogs(filters, sortOrder, logsLimit, skip);
 
       if (!logs || logs.length === 0) {
         return res.status(404).json({
@@ -122,14 +112,15 @@ const logController = {
         });
       }
 
-      // Return the logs to the user
       return res.status(200).json({
         success: true,
         data: logs,
         message: 'User logs retrieved successfully',
         pagination: {
           page: logsPage,
-          limit: logsLimit
+          limit: logsLimit,
+          total: total, // Include total count for pagination
+          totalPages: Math.ceil(total / logsLimit) // Calculate total pages
         }
       });
     } catch (error) {
@@ -141,9 +132,6 @@ const logController = {
       });
     }
   }
-
-
-
 };
 
 module.exports = logController;

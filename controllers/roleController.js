@@ -43,6 +43,14 @@ const assignPermissions = async (req, res) => {
         role.permissions = [...role.permissions, ...permissionIds];
         await role.save();
 
+        try {
+            const user = await User.findById(req.user._id);
+            await logService.addLog( user._id ,"ASSIGN_PERMISSIONS",{role : role.name ,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+          } catch (logError) {
+            console.error(" Error durring add user action to Logs :", logError);
+          }
+
+
         return res.status(200).json({ message: 'Permissions assigned', role });
     } catch (error) {
         return res.status(500).json({ message: 'Server error', error: error.message });
@@ -66,6 +74,13 @@ const assignRoles = async (req, res) => {
 
         user.roles = [...user.roles, ...roleIds];
         await user.save();
+
+        try {
+            const user = await User.findById(req.user._id);
+            await logService.addLog( user._id ,"ASSIGN_ROLES",{role : role.name ,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+          } catch (logError) {
+            console.error(" Error durring add user action to Logs :", logError);
+          }
 
         return res.status(200).json({ message: 'Roles assigned', user });
     } catch (error) {

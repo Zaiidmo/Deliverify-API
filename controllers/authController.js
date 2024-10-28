@@ -114,7 +114,7 @@ const register = async (req, res) => {
     });
   } catch (err) {
     // console.error("Error during registration:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error"+err.message });
   }
 };
 
@@ -286,9 +286,9 @@ const verifyOtp = async (req, res) => {
         },
         accessToken,
       });
-  } catch (err) {
+  } catch (err) { 
     // console.error(err);
-    res.status(500).json({ message: "Server error." });
+    res.status(500).json({ message: "Server error"+err.message });
   }
 };
 

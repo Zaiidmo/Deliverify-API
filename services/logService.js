@@ -77,25 +77,21 @@ const logService = {
  * @param {number} [skip=0] - Number of logs to skip (for pagination). Default is 0.
  * @returns {Promise<Array>} - The fetched logs based on the provided filters.
  */
-async getLogs(filters = {}, sort = { timestamp: -1 }, limit = 100, skip = 0) {
-  try {
-    // By passing 'filters' (which can be an empty object) to Log.find(),
-    // the function will either find all logs or apply the provided filters.
-    const logs = await Log.find(filters)
-      .sort(sort)   // Apply sorting (newest logs first by default)
-      .limit(limit) // Limit the number of results
-      .skip(skip)   // Skip logs (used for pagination)
-      .populate('user', 'username'); // Populate the 'user' field with the 'username'
-    
-    return logs;
-  } catch (error) {
-    console.error("Error fetching logs:", error);
-    throw error;
+async getLogs(filters = {}, sort = { timestamp: -1 }, limit = 10, skip = 0) {
+    try {
+      const total = await Log.countDocuments(filters); // Count total logs based on filters
+      const logs = await Log.find(filters)
+        .sort(sort)
+        .limit(limit)
+        .skip(skip)
+        .populate('user', 'username');
+
+      return { logs, total }; // Return both logs and total count
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      throw error;
+    }
   }
-}
-
-
-  
 };
 
 module.exports = logService;

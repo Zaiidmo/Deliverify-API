@@ -62,6 +62,14 @@ const createRestaurantWithItems = async (req, res) => {
       await item.save();
     }
 
+    //log user action
+    try {
+      const user = await User.findById(req.user._id);
+      await logService.addLog( user._id ,"CREATE_RESTAURANT_WITH_ITEMS",{restaurant : restaurant.name ,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+    } catch (logError) {
+      console.error(" Error durring add user action to Logs :", logError);
+    }
+
     // Return a success response
     res.status(201).json({
       message: "Restaurant and items created successfully",
@@ -107,6 +115,16 @@ const updateRestaurant = async (req, res) => {
       id,
       updateData
     );
+    
+    //log the action
+    const user = await User.findById(decoded._id);
+    try {
+      await logService.addLog( user._id ,"UPDATE_RESTAURANT",{restaurant : updatedRestaurant.name ,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+    } catch (logError) {
+      console.error(" Error durring add user action to Logs :", logError);
+    }
+
+
     return res.status(200).json(updatedRestaurant);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -153,6 +171,16 @@ const acceptRestaurant = async (req, res) => {
   try {
     const restaurantId = req.body.restaurantId;
     const restaurant = await restaurantService.acceptRestaurant(restaurantId);
+    
+    //log user action
+
+    const user = await User.findById(req.user._id);
+    try {
+      await logService.addLog( user._id ,"ACCEPT_RESTAURANT",{restaurant : restaurant.name ,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+    } catch (logError) {
+      console.error(" Error durring add user action to Logs :", logError);
+    }
+
     res
       .status(200)
       .json({

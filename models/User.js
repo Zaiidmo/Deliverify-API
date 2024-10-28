@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema({
   },
   CIN: {
     type: String,
-    required: [true, "CIN is required"],
+    required: false,
     unique: true,
     trim: true,
     validate: {
