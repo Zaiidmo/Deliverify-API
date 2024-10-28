@@ -10,7 +10,7 @@ const getAllUsers = async (req, res) => {
   try {
     // console.log("here");
     
-    const users = await User.find();
+    const users = await User.find().populate("roles");
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
