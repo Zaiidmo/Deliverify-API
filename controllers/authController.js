@@ -316,7 +316,7 @@ const logout = async (req, res) => {
 
     // Return success message
     try {
-      await logService.addLog(user._id,"USER_LOGOUT",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
+      await logService.addLog(user._id,"USER_LOGOUT",{user : user._id,ip : req.ip, username : user.username});
     } catch (logError) {
       console.error("Error durring add user action to Logs :", logError);
     }
