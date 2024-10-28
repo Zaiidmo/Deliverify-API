@@ -1,4 +1,3 @@
-// routes/roleRoutes.js
 const express = require('express');
 const {
     createRole,

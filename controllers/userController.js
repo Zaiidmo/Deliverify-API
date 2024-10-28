@@ -9,7 +9,7 @@ const jwtService = require("../services/jwtService");
 const getAllUsers = async (req, res) => {
   try {
     // console.log("here");
-    
+  
     const users = await User.find().populate("roles");
     res.status(200).json(users);
   } catch (error) {
