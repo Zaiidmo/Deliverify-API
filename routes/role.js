@@ -24,6 +24,6 @@ router.post('/assign-permissions', assignPermissions);
 router.post('/assign-roles', assignRoles);
 
 // Route to get all roles
-router.get('/roles', getAllRoles);
+router.get('/', getAllRoles);
 
 module.exports = router;
