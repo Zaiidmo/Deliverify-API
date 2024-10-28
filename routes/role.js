@@ -4,7 +4,8 @@ const {
     createRole,
     assignPermissions,
     assignRoles,
-    getAllRoles
+    getAllRoles,
+    getAllPermissions
 } = require('../controllers/roleController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const { isAdmin } = require('../middlewares/adminMiddleware');
@@ -25,5 +26,7 @@ router.post('/assign-roles', assignRoles);
 
 // Route to get all roles
 router.get('/', getAllRoles);
+
+router.get('/permissions', getAllPermissions);
 
 module.exports = router;
