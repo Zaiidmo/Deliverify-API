@@ -81,10 +81,27 @@ const getAllPermissions = async (req, res) => {
     }
 }
 
+const deleteRole = async (req, res) => {
+    try {
+      const { roleId } = req.params;
+  
+      const role = await Role.findByIdAndDelete(roleId);
+      if (!role) {
+        return res.status(404).json({ message: 'Role not found' });
+      }
+  
+      return res.status(200).json({ message: 'Role deleted' });
+    } catch (error) {
+      return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  };
+  
+
 module.exports = {
     createRole,
     assignPermissions,
     assignRoles,
     getAllRoles,
-    getAllPermissions
+    getAllPermissions,
+    deleteRole
 };

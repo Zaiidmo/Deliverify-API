@@ -4,7 +4,8 @@ const {
     assignPermissions,
     assignRoles,
     getAllRoles,
-    getAllPermissions
+    getAllPermissions,
+    deleteRole
 } = require('../controllers/roleController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const { isAdmin } = require('../middlewares/adminMiddleware');
@@ -27,5 +28,7 @@ router.post('/assign-roles', assignRoles);
 router.get('/', getAllRoles);
 
 router.get('/permissions', getAllPermissions);
+
+router.delete('/:roleId', deleteRole);
 
 module.exports = router;
