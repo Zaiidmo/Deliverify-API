@@ -3,6 +3,7 @@ const Role = require("../models/Role");
 const passwordService = require("../services/passwordService")
 const { validateRegistration } = require("../validations/authValidations");
 const jwtService = require("../services/jwtService");
+const logService = require("../services/logService");
 
 
 // get all users
@@ -89,6 +90,16 @@ const createUser = async (req, res) => {
 
     await newUser.save();
 
+    try {
+      await logService.addLog(req.user._id, "CREATE_USER", {
+        fullname: newUser.fullname.fname + " " + newUser.fullname.lname,
+        ip: req.ip,
+        username: newUser.username,
+      });
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
+
     res.status(201).json({
       message: "User registered successfully.",
       user: {
@@ -117,6 +128,17 @@ const updateUser = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    try {
+      await logService.addLog(req.user._id, "UPDATE_USER", {
+        fullname: updatedUser.fullname.fname + " " + updatedUser.fullname.lname,
+        ip: req.ip,
+        username: updatedUser.username,
+      });
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
+    
     res.status(200).json({"Updated fields": req.body, "User": updatedUser});
   } catch (error) {
     console.error(error);

@@ -1,9 +1,19 @@
 const Restaurant = require("../models/Restaurant");
 const Item = require("../models/Item");
 
+const logService  = require("../services/logService");
+
+
 const search = async (req, res) => {
   try {
     const { query } = req.query;
+
+    try { 
+      const user = await User.findById(req.user._id); 
+      await logService.addLog( user._id ,"SEARCH",{searchFor: query,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname });
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
 
     // Check if the query is provided
     if (!query) {

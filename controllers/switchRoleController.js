@@ -1,5 +1,6 @@
 const Role = require("../models/Role");
 const User = require("../models/User");
+const logService = require("../services/logService");
 
 const switchRoleToDelivery = async (req, res) => {
   const { id } = req.params; 
@@ -16,6 +17,19 @@ const switchRoleToDelivery = async (req, res) => {
     // Switch the user's role to Delivery
     user.roles = [deliveryRole._id]; 
     await user.save(); 
+
+    try {
+      const user = await User.findById(id);
+      await logService.addLog(user._id, "SWITCH_ROLE", {
+        role: "Delivery",
+        ip: req.ip,
+        username: user.username,
+        fullname: user.fullname.fname + " " + user.fullname.lname,
+      });
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
+    
 
     return res.status(200).json({ message: "Role switched to Delivery", user });
   } catch (error) {
