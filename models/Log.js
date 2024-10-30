@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 
 const logSchema = new mongoose.Schema({
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed,
     ref: "User",
-    required: true
+    required: false
   },
   action: {
     type: String,

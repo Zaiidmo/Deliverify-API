@@ -193,6 +193,16 @@ const switchRoleToDelivery = async (req, res) => {
     user.roles.push(roleId);
     await user.save(); 
 
+    try {
+      await logService.addLog(req.user._id, "SWITCH_ROLE_TO_DELIVERY", {
+        fullname: user.fullname.fname + " " + user.fullname.lname,
+        ip: req.ip,
+        username: user.username,
+      });
+    } catch (logError) {
+      console.error("Error durring add user action to Logs :", logError);
+    }
+
     return res.status(200).json({ message: "Role switched to Delivery", user });
   } catch (error) {
     console.error("Error switching role: ", error);

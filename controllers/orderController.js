@@ -86,6 +86,17 @@ const purchase = async (req, res, io) => {
     // Step 7: Save the order to the database
     await newOrder.save();
 
+      try {
+        const user = await User.findById(req.user._id || newOrder.user._id);
+        await logService.addLog(user._id, "ORDER_PLACED", {
+          orderId: newOrder._id,
+          message: `Order ${newOrder._id} has been placed successfully`,
+          status: newOrder.status,
+        });
+      } catch (error) {
+        console.error("Error logging order:", error);
+      }
+
     // Step 8: Respond with success
     return res.status(201).json({
       message: "Order placed successfully",
