@@ -11,7 +11,6 @@ const GUEST_USER = {
   },
 };
 
-const logService  = require("../services/logService");
 
 
 const search = async (req, res) => {

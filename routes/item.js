@@ -22,5 +22,5 @@ router.delete('/deleteItem/:id', authMiddleware, deleteItem);
 
 // change the availability
 router.put('/changeTheAvailabality/:id', authMiddleware, changeTheAvailabality);
-
+        
 module.exports = router
