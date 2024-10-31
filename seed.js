@@ -50,6 +50,17 @@ const seedDatabase = async () => {
       permissions: [...initialPermissions.map((permission) => permission._id)],
     },
     {
+      name: "Seller",
+      permissions: [
+        initialPermissions[4]._id,
+        initialPermissions[5]._id,
+        initialPermissions[6]._id,
+        initialPermissions[7]._id,
+        initialPermissions[8]._id,
+        initialPermissions[9]._id,
+      ],
+    },
+    {
       name: "Client",
       permissions: [
         initialPermissions[4]._id,
