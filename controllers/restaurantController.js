@@ -52,6 +52,7 @@ const createRestaurantWithItems = async (req, res) => {
     const { items, ...restaurantData } = req.body;
 
     // Create and save the restaurant
+    console.log("restaurantData", req.body);
     const restaurant = await restaurantService.createRestaurant(restaurantData)
     // Create and save each item linked to the newly created restaurant
     for (let i = 0; i < items.length; i++) {
