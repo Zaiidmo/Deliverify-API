@@ -1,7 +1,7 @@
 const express = require('express');
 const authMiddleware = require('../middlewares/authMiddleware');
 const { isSeller } = require('../middlewares/sellerMiddleware');
-const { getClientOrders } = require('../controllers/orderController');
+const { getOrdersByClient } = require('../controllers/orderController');
 const router = express.Router();
 
 
@@ -9,6 +9,6 @@ const router = express.Router();
 router.use(authMiddleware, isSeller);
 
 // Get Client's Orders
-router.get('/:id', getClientOrders);
+router.get('/:id', getOrdersByClient);
 
 module.exports = router;

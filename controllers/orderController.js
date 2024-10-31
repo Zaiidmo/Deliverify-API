@@ -221,7 +221,7 @@ const getPendingOrders = async (req, res) => {
   }
 };
 
-const getClientOrders = async (req, res) => {
+const getOrdersByClient = async (req, res) => {
   try {
     const token =
       req.headers.authorization && req.headers.authorization.split(" ")[1];
@@ -251,5 +251,5 @@ module.exports = {
   getOrderStatus,
   confirmDelivery,
   getPendingOrders,
-  getClientOrders,
+  getOrdersByClient,
 };
