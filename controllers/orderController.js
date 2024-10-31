@@ -223,6 +223,9 @@ const getPendingOrders = async (req, res) => {
 
 const getOrdersByClient = async (req, res) => {
   try {
+    const id = req.params.id;
+    // console.log("id", id);
+    
     const token =
       req.headers.authorization && req.headers.authorization.split(" ")[1];
     if (!token) {
@@ -232,12 +235,13 @@ const getOrdersByClient = async (req, res) => {
     if (!decoded) {
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
     } 
-    const user = await User.findById(decoded._id);
+    const user = await User.findById(id);
+    console.log("user", user);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
     const orders = await Order.find({ user: user._id });
-    const ordersCount = await Order.countDocuments();
+    const ordersCount = await Order.countDocuments({ user: user._id });
     return res.status(200).json({ordersCount, orders });
   } catch (error) {
     console.error("Error getting client orders:", error);
