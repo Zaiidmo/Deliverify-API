@@ -5,7 +5,7 @@ const socketService = require("../services/socketService");
 const User = require("../models/User");
 const Order = require("../models/Order");
 const Item = require("../models/Item");
-const logService  = require("../services/logService");
+const logService = require("../services/logService");
 
 const purchase = async (req, res, io) => {
   try {
@@ -129,82 +129,127 @@ const getOrderStatus = async (req, res) => {
 };
 
 const confirmDelivery = async (req, res) => {
-    try {
-      const token =
-        req.headers.authorization && req.headers.authorization.split(" ")[1];
-      if (!token) {
-        return res.status(401).json({ message: "Unauthorized: Missing token" });
-      }
-  
-      const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
-      if (!decoded) {
-        return res.status(401).json({ message: "Unauthorized: Invalid token" });
-      }
-
-      const user = await User.findById(decoded._id).populate("roles");
-      if (!user || !user.roles.some((role) => role.name === "Delivery")) {
-        return res.status(403).json({ message: "Forbidden: Only Delivery Persons" });
-      }
-  
-      const { orderId, OtpConfirm } = req.body;
-  
-      const order = await Order.findById(orderId);
-      if (!order) {
-        return res.status(404).json({ message: "Order not found" });
-      }
-  
-      if (order.otpConfirm !== OtpConfirm) {
-        return res.status(400).json({ message: "Invalid OTP" });
-      }
-  
-      // Update the order's delivery confirmation status
-      order.status = "Delivered";
-      await order.save();
-      
-      try {
-        const user = await User.findById(req.user._id);
-        await logService.addLog( user._id ,"CONFIRM_DELIVERY",{user : user._id,ip : req.ip, username : user.username, fullname : user.fullname.fname + " " + user.fullname.lname});
-      } catch (logError) {
-        console.error(" Error durring add user action to Logs :", logError);
-      }
-  
-      return res
-        .status(200)
-        .json({ message: "Delivery confirmed successfully", order });
-    } catch (error) {
-      console.error("Error confirming delivery:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal Server Error: " + error.message });
+  try {
+    const token =
+      req.headers.authorization && req.headers.authorization.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: Missing token" });
     }
-  };
 
-  const getPendingOrders = async (req, res) => {
-    try {
-      const token =
-        req.headers.authorization && req.headers.authorization.split(" ")[1];
-      if (!token) {
-        return res.status(401).json({ message: "Unauthorized: Missing token" });
-      }
-  
-      const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
-      if (!decoded) {
-        return res.status(401).json({ message: "Unauthorized: Invalid token" });
-      }
-  
-      const user = await User.findById(decoded._id);
-      if (!user || !user.roles.some((role) => role.name === "Delivery" || role.name === "Admin")) {
-        return res.status(403).json({ message: "Forbidden: Only Delivery Persons" });
-      }
-  
-      const orders = await Order.find({ status: "Pending" || "Paid" });
-      return res.status(200).json({ orders });
-    } catch (error) {
-      console.error("Error getting pending orders:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal Server Error: " + error.message });
+    const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
+    if (!decoded) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
+
+    const user = await User.findById(decoded._id).populate("roles");
+    if (!user || !user.roles.some((role) => role.name === "Delivery")) {
+      return res
+        .status(403)
+        .json({ message: "Forbidden: Only Delivery Persons" });
+    }
+
+    const { orderId, OtpConfirm } = req.body;
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.otpConfirm !== OtpConfirm) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // Update the order's delivery confirmation status
+    order.status = "Delivered";
+    await order.save();
+
+    try {
+      const user = await User.findById(req.user._id);
+      await logService.addLog(user._id, "CONFIRM_DELIVERY", {
+        user: user._id,
+        ip: req.ip,
+        username: user.username,
+        fullname: user.fullname.fname + " " + user.fullname.lname,
+      });
+    } catch (logError) {
+      console.error(" Error durring add user action to Logs :", logError);
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Delivery confirmed successfully", order });
+  } catch (error) {
+    console.error("Error confirming delivery:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error: " + error.message });
   }
-  
-module.exports = { purchase, getOrderStatus, confirmDelivery, getPendingOrders };
+};
+
+const getPendingOrders = async (req, res) => {
+  try {
+    const token =
+      req.headers.authorization && req.headers.authorization.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: Missing token" });
+    }
+
+    const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
+    if (!decoded) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    }
+
+    const user = await User.findById(decoded._id);
+    if (
+      !user ||
+      !user.roles.some(
+        (role) => role.name === "Delivery" || role.name === "Admin"
+      )
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Forbidden: Only Delivery Persons" });
+    }
+
+    const orders = await Order.find({ status: "Pending" || "Paid" });
+    return res.status(200).json({ orders });
+  } catch (error) {
+    console.error("Error getting pending orders:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error: " + error.message });
+  }
+};
+
+const getClientOrders = async (req, res) => {
+  try {
+    const token =
+      req.headers.authorization && req.headers.authorization.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: Missing token" });
+    }
+    const decoded = jwtService.verifyToken(token);
+    if (!decoded) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    } 
+    const user = await User.findById(decoded._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const orders = await Order.find({ user: user._id });
+    const ordersCount = await Order.countDocuments();
+    return res.status(200).json({ordersCount, orders });
+  } catch (error) {
+    console.error("Error getting client orders:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error: " + error.message });
+  }
+};  
+module.exports = {
+  purchase,
+  getOrderStatus,
+  confirmDelivery,
+  getPendingOrders,
+  getClientOrders,
+};

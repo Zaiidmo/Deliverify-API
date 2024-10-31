@@ -16,6 +16,7 @@ const socketService = require('./services/socketService');
 const searchRoutes = require('./routes/search');
 const itemRoutes = require('./routes/item');
 const userRoutes = require('./routes/user');
+const sellerRoutes = require('./routes/seller');
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
@@ -45,6 +46,7 @@ app.use('/api/roles', roleRoutes);
 app.use("/api/item", itemRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/seller", sellerRoutes);
 
 // Initialize Socket.IO server
 const io = initializeSocketServer(server);

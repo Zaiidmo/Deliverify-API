@@ -27,4 +27,4 @@ const isSeller = async (req, res, next) => {
     }
 };
 
-module.exports = { isAdmin };
+module.exports = { isSeller };
