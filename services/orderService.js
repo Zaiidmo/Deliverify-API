@@ -1,4 +1,3 @@
-//C:\Users\Youcode\Desktop\Deliverify-API\services\orderService.js
 const { Order } = require('../models/Order');
 const activityService = require('./activityService');
 
