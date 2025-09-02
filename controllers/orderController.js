@@ -1,3 +1,4 @@
+// orderController.js
 const jwtService = require("../services/jwtService");
 const mollieService = require("../services/mollieService");
 const OptService = require("../services/otpService");
@@ -6,91 +7,119 @@ const User = require("../models/User");
 const Order = require("../models/Order");
 const Item = require("../models/Item");
 const logService = require("../services/logService");
+const mongoose = require("mongoose");
+const { getPayment } = require("../services/mollieService");
 
-const purchase = async (req, res, io) => {
+const purchase = async (req, res) => {
   try {
-    // Step 1: Verify token
+    // 1) Auth
     const token =
       req.headers.authorization && req.headers.authorization.split(" ")[1];
-    if (!token) {
+    if (!token)
       return res.status(401).json({ message: "Unauthorized: Missing token" });
-    }
 
     const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
-    if (!decoded) {
+    if (!decoded)
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
-    }
 
-    // Step 2: Verify user exists
     const user = await User.findById(decoded._id);
-    if (!user) {
+    if (!user)
       return res.status(401).json({ message: "Unauthorized: User not found" });
-    }
 
-    // Step 3: Extract order details from the request body
-    const { items: orderItems } = req.body;
-
-    // Check if orderItems is defined and is an array
+    // 2) Input
+    const {
+      items: orderItems,
+      address,
+      paymentMethod,
+      notes,
+      restaurantId,
+      returnUrl,
+    } = req.body;
     if (!Array.isArray(orderItems) || orderItems.length === 0) {
       return res
         .status(400)
         .json({ message: "Invalid order data: No items provided" });
     }
 
+    // 3) Recalculate totals
     const items = [];
     let totalAmount = 0;
 
-    // Step 4: Loop through the items and fetch their details from the database
     for (const { itemId, quantity } of orderItems) {
       if (!itemId || !quantity) {
         return res
           .status(400)
           .json({ message: "Invalid item data: Missing itemId or quantity" });
       }
-
       const item = await Item.findById(itemId);
       if (!item) {
         return res
           .status(400)
           .json({ message: `Invalid item data: Item ${itemId} not found` });
       }
-
-      items.push({ item: itemId, quantity: quantity });
-      totalAmount += item.price * quantity; // Assumes item.price exists
+      items.push({ item: itemId, quantity });
+      totalAmount += Number(item.price) * Number(quantity);
     }
 
-    // Step 5: Create payment
+    // 4) Pre-generate order id
+    const orderId = new mongoose.Types.ObjectId();
+
+    // 5) Build redirectUrl (mobile if provided, else web)
+    const redirectUrl = returnUrl
+      ? `${returnUrl}?status=success&orderId=${orderId}`
+      : `${process.env.CLIENT_URL}/payment-success?orderId=${orderId}`;
+
+    const bridgeUrl = `${
+      process.env.CLIENT_URL_BRIDGE
+    }/?orderId=${encodeURIComponent(orderId)}`;
+    
+    // 6) Create Mollie payment FIRST (put orderId in metadata)
+    //   NOTE: this expects mollieService.createPayment(amount, desc, opts)
     const payment = await mollieService.createPayment(
       totalAmount,
-      `Order By ${user.username}`
+      `Order #${orderId} by ${user.username}`,
+      {
+        redirectUrl: bridgeUrl,
+        // webhookUrl: `${process.env.BASE_URL}/api/webhooks/mollie`,
+        metadata: { orderId: String(orderId), userId: String(user._id) },
+      }
     );
 
-    // Check payment creation
     if (!payment || !payment.id) {
       return res.status(500).json({ message: "Payment creation failed" });
     }
 
-    const OtpConfirm = OptService.generateOTP();
-
-    // Step 6: Create the order
+    // 7) Create & save order WITH paymentId present (single save)
     const newOrder = new Order({
+      _id: orderId,
       user: user._id,
-      items: items,
-      totalAmount: totalAmount,
-      otpConfirm: OtpConfirm,
-      status: payment.status === "paid" ? "Paid" : "Pending",
+      items,
+      address,
+      notes,
+      restaurant: restaurantId,
+      totalAmount,
+      otpConfirm: OptService.generateOTP(),
+      status: "Pending",
+      paymentProvider: "mollie",
+      paymentStatus: "open",
       paymentId: payment.id,
+      paymentLink:
+        payment.checkoutUrl || payment._links?.checkout?.href || null,
     });
 
-    socketService.notifyDeliveryPersons(newOrder);
-    // Step 7: Save the order to the database
     await newOrder.save();
 
-    // Step 8: Respond with success
+    // 8) Notify delivery
+    socketService.notifyDeliveryPersons(newOrder);
+
+    console.log(newOrder);
+
+    // 9) Respond
     return res.status(201).json({
       message: "Order placed successfully",
       order: newOrder,
-      paymentLink: payment._links.checkout.href,
+      paymentLink: newOrder.paymentLink,
+      checkoutUrl: newOrder.paymentLink,
     });
   } catch (error) {
     console.error("Error processing purchase:", error);
@@ -221,39 +250,41 @@ const getPendingOrders = async (req, res) => {
   }
 };
 
-const getOrdersByClient = async (req, res) => {
+const confirmPayment = async (req, res) => {
   try {
-    const id = req.params.id;
-    // console.log("id", id);
-    
-    const token =
-      req.headers.authorization && req.headers.authorization.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized: Missing token" });
+    const { orderId, paymentId } = req.body;
+    if (!paymentId && !orderId)
+      return res.status(400).json({ message: "Missing orderId or paymentId" });
+
+    // find order by paymentId or id
+    const order = paymentId
+      ? await Order.findOne({ paymentId })
+      : await Order.findById(orderId);
+
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    const p = await getPayment(order.paymentId);
+    if (p.isPaid) {
+      order.status = "Paid";
+      order.paymentStatus = "paid";
+      order.paidAt = p.paidAt || new Date();
+      await order.save();
     }
-    const decoded = jwtService.verifyToken(token);
-    if (!decoded) {
-      return res.status(401).json({ message: "Unauthorized: Invalid token" });
-    } 
-    const user = await User.findById(id);
-    console.log("user", user);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const orders = await Order.find({ user: user._id });
-    const ordersCount = await Order.countDocuments({ user: user._id });
-    return res.status(200).json({ordersCount, orders });
-  } catch (error) {
-    console.error("Error getting client orders:", error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error: " + error.message });
+    return res.json({
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      orderId: String(order._id),
+    });
+  } catch (e) {
+    console.error("confirmPayment error", e);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
-};  
+};
+
 module.exports = {
   purchase,
   getOrderStatus,
   confirmDelivery,
   getPendingOrders,
-  getOrdersByClient,
+  confirmPayment,
 };

@@ -9,5 +9,6 @@ module.exports = (io) => {
     router.get('/history', authMiddleware, (req, res) => getOrderStatus(req, res));
     router.post('/confirm-delivery', authMiddleware, (req, res) => confirmDelivery(req, res));
     router.get('/pending-orders', authMiddleware, (req, res) => getPendingOrders(req, res));
+    router.post('/confirm', authMiddleware, (req, res) => confirmPayment(req, res));
     return router;
 };

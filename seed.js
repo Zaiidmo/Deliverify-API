@@ -5,6 +5,7 @@ const Permission = require("./models/Permission");
 const Restaurant = require("./models/Restaurant");
 const Item = require("./models/Item");
 const Order = require("./models/Order");
+const passwordService = require("./services/passwordService");
 
 const seedDatabase = async () => {
   await connectDB();
@@ -30,7 +31,7 @@ const seedDatabase = async () => {
     { name: "UPDATE_REVIEW", description: "Update an existing review" },
     {
       name: "DELETE_REVIEW",
-      dAlloMediaescription: "Delete an existing review",
+      description: "Delete an existing review",
     },
     { name: "CREATE_LIKE", description: "Create a new like" },
     { name: "DELETE_LIKE", description: "Delete an existing like" },
@@ -90,13 +91,15 @@ const seedDatabase = async () => {
   console.log("Roles created: ", initialRoles);
 
   // Define initial users
+
+const hashedPassword = await passwordService.hashPassword("password");
   const users = [
     {
       fullname: { fname: "Admin", lname: "Test" },
       username: "Admin",
       email: "admin@email.com",
       phoneNumber: "1234567890",
-      password: "password",
+      password: hashedPassword,
       CIN: "AA123456",
       roles: [initialRoles[0]._id],
       isVerified: true,
@@ -106,7 +109,7 @@ const seedDatabase = async () => {
       username: "Client",
       email: "client@email.com",
       phoneNumber: "1234522310",
-      password: "password",
+      password: hashedPassword,
       CIN: "CC123456",
       roles: [initialRoles[1]._id],
       isVerified: true,
@@ -116,7 +119,7 @@ const seedDatabase = async () => {
       username: "Manager",
       email: "manager@email.com",
       phoneNumber: "1234542410",
-      password: "password",
+      password: hashedPassword,
       CIN: "MM123456",
       roles: [initialRoles[2]._id],
       isVerified: true,
@@ -126,7 +129,7 @@ const seedDatabase = async () => {
       username: "Delivery",
       email: "delivery@email.com",
       phoneNumber: "1234562290",
-      password: "password",
+      password: hashedPassword,
       CIN: "DD123456",
       roles: [initialRoles[3]._id],
       isVerified: true,
@@ -191,10 +194,7 @@ const seedDatabase = async () => {
       phoneNumber: "3344556677",
       logo: "path/to/logo3.jpg",
       cover: "path/to/cover3.jpg",
-      images: [
-        "path/to/image9.jpg",
-        "path/to/image10.jpg",
-      ],
+      images: ["path/to/image9.jpg", "path/to/image10.jpg"],
       owner: initialUsers[0]._id,
       openAt: "09:00",
       closeAt: "21:00",
