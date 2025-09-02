@@ -9,6 +9,6 @@ const router = express.Router();
 router.use(authMiddleware, isSeller);
 
 // Get Client's Orders
-router.get('/:id', getOrdersByClient);
+// router.get('/:id', getOrdersByClient);
 
 module.exports = router;
