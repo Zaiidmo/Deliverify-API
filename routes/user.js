@@ -1,32 +1,37 @@
+// routes/user.js
 const express = require("express");
 const router = express.Router();
-const authMiddleware = require("../middlewares/authMiddleware");
+const auth = require("../middlewares/authMiddleware");
+const { isAdmin } = require("../middlewares/adminMiddleware");
+
 const {
   getAllUsers,
   getUserById,
   createUser,
   updateUser,
   banUser,
-  switchRoleToDelivery
+  // self-service
+  getMe,
+  updateMe,
+  getMyOrders,
+  getMyStats,
+  switchRoleToDelivery,
 } = require("../controllers/userController");
-const { isAdmin } = require("../middlewares/adminMiddleware");
 
-// get all users
+// ---------- Admin endpoints ----------
 router.get("/", isAdmin, getAllUsers);
+router.get("/user/:id", isAdmin, getUserById);
+router.post("/createUser", auth, isAdmin, createUser);
+router.put("/updateUser/:id", auth, isAdmin, updateUser);
+router.put("/banUser/:id", auth, isAdmin, banUser);
 
-// get user
-router.get("/user/:id", getUserById);
+// ---------- Authed user (profile) ----------
+router.get("/me", auth, getMe);
+router.patch("/me", auth, updateMe);
+router.get("/me/orders", auth, getMyOrders);
+router.get("/me/stats", auth, getMyStats);
 
-// create user
-router.post("/createUser", authMiddleware, isAdmin, createUser);
-
-// update user
-router.put("/UpdateUser/:id", authMiddleware, isAdmin, updateUser);
-
-// banne the user
-router.put("/banneUser/:id", authMiddleware,isAdmin, banUser);
-
-// switch role
-router.post("/switchRole", authMiddleware, switchRoleToDelivery);
+// ---------- Roles ----------
+router.post("/switchRole", auth, switchRoleToDelivery);
 
 module.exports = router;

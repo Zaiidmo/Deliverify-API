@@ -46,5 +46,5 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+orderSchema.index({ user: 1, createdAt: -1 }); // speeds up /me/orders & /me/stats
 module.exports = mongoose.model("Order", orderSchema);

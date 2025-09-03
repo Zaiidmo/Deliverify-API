@@ -215,76 +215,32 @@ const confirmDelivery = async (req, res) => {
   }
 };
 
-const getPendingOrders = async (req, res) => {
-  try {
-    const token =
-      req.headers.authorization && req.headers.authorization.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized: Missing token" });
-    }
-
-    const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
-    if (!decoded) {
-      return res.status(401).json({ message: "Unauthorized: Invalid token" });
-    }
-
-    const user = await User.findById(decoded._id);
-    if (
-      !user ||
-      !user.roles.some(
-        (role) => role.name === "Delivery" || role.name === "Admin"
-      )
-    ) {
+  const getPendingOrders = async (req, res) => {
+    try {
+      const token =
+        req.headers.authorization && req.headers.authorization.split(" ")[1];
+      if (!token) {
+        return res.status(401).json({ message: "Unauthorized: Missing token" });
+      }
+  
+      const decoded = jwtService.verifyToken(token, process.env.JWT_SECRET);
+      if (!decoded) {
+        return res.status(401).json({ message: "Unauthorized: Invalid token" });
+      }
+  
+      const user = await User.findById(decoded._id);
+      if (!user || !user.roles.some((role) => role.name === "Delivery" || role.name === "Admin")) {
+        return res.status(403).json({ message: "Forbidden: Only Delivery Persons" });
+      }
+  
+      const orders = await Order.find({ status: "Pending" || "Paid" });
+      return res.status(200).json({ orders });
+    } catch (error) {
+      console.error("Error getting pending orders:", error);
       return res
-        .status(403)
-        .json({ message: "Forbidden: Only Delivery Persons" });
+        .status(500)
+        .json({ message: "Internal Server Error: " + error.message });
     }
-
-    const orders = await Order.find({ status: "Pending" || "Paid" });
-    return res.status(200).json({ orders });
-  } catch (error) {
-    console.error("Error getting pending orders:", error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error: " + error.message });
   }
-};
-
-const confirmPayment = async (req, res) => {
-  try {
-    const { orderId, paymentId } = req.body;
-    if (!paymentId && !orderId)
-      return res.status(400).json({ message: "Missing orderId or paymentId" });
-
-    // find order by paymentId or id
-    const order = paymentId
-      ? await Order.findOne({ paymentId })
-      : await Order.findById(orderId);
-
-    if (!order) return res.status(404).json({ message: "Order not found" });
-
-    const p = await getPayment(order.paymentId);
-    if (p.isPaid) {
-      order.status = "Paid";
-      order.paymentStatus = "paid";
-      order.paidAt = p.paidAt || new Date();
-      await order.save();
-    }
-    return res.json({
-      status: order.status,
-      paymentStatus: order.paymentStatus,
-      orderId: String(order._id),
-    });
-  } catch (e) {
-    console.error("confirmPayment error", e);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-module.exports = {
-  purchase,
-  getOrderStatus,
-  confirmDelivery,
-  getPendingOrders,
-  confirmPayment,
-};
+  
+module.exports = { purchase, getOrderStatus, confirmDelivery, getPendingOrders };
