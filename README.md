@@ -1,18 +1,15 @@
-# Deliverify API
+# 🚚 Deliverify API
 
-Welcome to the **Deliverify API**! This API is designed to manage deliveries, users, roles, and other related resources for a delivery management platform.
+The **Deliverify API** powers the Deliverify delivery management ecosystem — handling authentication, deliveries, users, and roles.  
+It’s built with **Node.js**, **Express.js**, and **MongoDB**, with full JWT-based security and over 130 Jest test cases for reliability.
 
-## Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Environment Variables](#environment-variables)
-- [Running the API](#running-the-api)
-- [API Endpoints](#api-endpoints)
-- [Authentication](#authentication)
-- [Testing](#testing)
-- [Error Handling](#error-handling)
-- [Contributing](#contributing)
+<p align="left">
+  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-18.x-green">
+  <img alt="Express.js" src="https://img.shields.io/badge/Express.js-Backend-black">
+  <img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Database-brightgreen">
+  <img alt="Jest" src="https://img.shields.io/badge/Testing-Jest-red">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-blue">
+</p>
 
 ---
 
@@ -69,8 +66,8 @@ The API will run on `http://localhost:3000`.
 ## API Endpoints
 
 **Documentation**
-Please check the official API documentation to get to know all functionnalities and endpoints, on the following link 
-[Documentation](https://documenter.getpostman.com/view/32635893/2sAY4rFkfi) 
+Please check the official API documentation to get to know all functionnalities and endpoints, on the following link
+[Documentation](https://documenter.getpostman.com/view/32635893/2sAY4rFkfi)
 
 ## Authentication
 
@@ -105,8 +102,8 @@ Tests include:
 - Authentication tests.
 - Role management tests.
 - User and delivery operations.
-- Error handling tests. 
-Any many others of a count of 32 Test Suite, almost 132 tests
+- Error handling tests.
+  Any many others of a count of 32 Test Suite, almost 132 tests
 
 ---
 
@@ -123,14 +120,7 @@ The API uses consistent error handling. Errors are returned with appropriate HTT
 
 ## Contributing
 
-Contributions to this project are welcome! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new feature branch.
-3. Make your changes and commit.
-4. Open a pull request, detailing the changes made.
-
-Be sure to write appropriate tests for any new features.
+[CONTRIBUTING](CONRTIBUTING.md)
 
 ---
 
